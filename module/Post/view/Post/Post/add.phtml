@@ -1,0 +1,45 @@
+<?php
+$title = 'Add new post';
+$this->headTitle($title);
+?>
+<h1><?= $this->escapeHtml($title) ?></h1>
+<?php
+// This provides a default CSS class and placeholder text for the title element:
+$post = $form->get('title');
+$post->setAttribute('class', 'form-control');
+$post->setAttribute('placeholder', 'post title');
+
+// This provides a default CSS class and placeholder text for the description element:
+$description = $form->get('description');
+$description->setAttribute('class', 'form-control');
+$description->setAttribute('placeholder', 'description');
+
+// This provides CSS classes for the submit button:
+$submit = $form->get('submit');
+$submit->setAttribute('class', 'btn btn-primary');
+
+$form->setAttribute('action', $this->url('post', ['action' => 'add']));
+$form->prepare();
+
+echo $this->form()->openTag($form);
+?>
+<?php 
+	  // Wrap the elements in divs marked as form groups, and render the
+      // label, element, and errors separately within 
+?>
+<div class="form-group">
+    <?= $this->formLabel($post) ?>
+    <?= $this->formElement($post) ?>
+    <?= $this->formElementErrors()->render($post, ['class' => 'help-block']) ?>
+</div>
+
+<div class="form-group">
+    <?= $this->formLabel($description) ?>
+    <?= $this->formElement($description) ?>
+    <?= $this->formElementErrors()->render($description, ['class' => 'help-block']) ?>
+</div>
+
+<?php
+echo $this->formSubmit($submit);
+echo $this->formHidden($form->get('id'));
+echo $this->form()->closeTag();

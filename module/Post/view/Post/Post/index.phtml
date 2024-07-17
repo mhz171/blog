@@ -1,0 +1,28 @@
+<?php
+// module/Album/view/post/post/index.phtml:
+
+$title = 'My posts';
+$this->headTitle($title);
+?>
+<h1><?= $this->escapeHtml($title) ?></h1>
+<p>
+    <a href="<?= $this->url('post', ['action' => 'add']) ?>">Add new post</a>
+</p>
+
+<table class="table">
+<tr>
+    <th>Title</th>
+    <th>Description</th>
+    <th>&nbsp;</th>
+</tr>
+<?php foreach ($posts as $post) : ?>
+    <tr>
+        <td><?= $this->escapeHtml($post->title) ?></td>
+        <td><?= $this->escapeHtml($post->description) ?></td>
+        <td>
+            <a href="<?= $this->url('post', ['action' => 'edit', 'id' => $post->id]) ?>">Edit</a>
+            <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post->id]) ?>">Delete</a>
+        </td>
+    </tr>
+<?php endforeach; ?>
+</table>
