@@ -5,6 +5,7 @@ namespace Post\Model;
 use Laminas\Form\Form;
 use Post\Model\Post;
 use Post\Service\PostService;
+use Post\Service\TimeService;
 use RuntimeException;
 use Laminas\Db\TableGateway\TableGatewayInterface;
 class PostTable{
@@ -36,18 +37,16 @@ class PostTable{
         
         $id = (int) $post->id;
         if ($id === 0){
-
-            $postService = new PostService(new Form());
-            $time = $postService->timeToShamsi();
-            $data['created_at'] = $time;
+            date_default_timezone_set("Asia/Tehran");
+            $data['created_at'] = date('Y-m-d H:i:s');
             $this->tableGateway->insert($data);
             return;
         }
-        // try{
-        //     $this->getPost($id);
-        // } catch(RuntimeException $e){
-        //     throw new RuntimeException(sprintf("Can't update te Record whit id %d", $id));
-        // }
+         try{
+             $this->getPost($id);
+         } catch(RuntimeException $e){
+             throw new RuntimeException(sprintf("Can't update te Record whit id %d", $id));
+         }
         $this->tableGateway->update($data,['id' => $id]);
     }
 

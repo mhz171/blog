@@ -3,7 +3,6 @@
 namespace Post\Service;
 
 use Post\Form\PostForm;
-
 class PostService
 {
     private $postForm;

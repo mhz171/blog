@@ -37,6 +37,7 @@ use Laminas\Db\TableGateway\TableGateway;
                 PostTable::class => PostTableFactory::class,
                 Model\PostTableGateway::class => PostTableGatewayFactory::class,
                 Post\Service\PostService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
+                Post\Service\TimeService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
             ],
         ];
     }

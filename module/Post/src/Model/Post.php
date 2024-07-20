@@ -9,6 +9,8 @@ use Laminas\Validator\StringLength;
 use Laminas\Filter\StringTrim;
 use Laminas\Filter\StripTags;
 use Laminas\Filter\ToInt;
+use Post\Service\TimeService;
+
 class Post implements InputFilterAwareInterface
 {
     public $id;
@@ -22,7 +24,11 @@ class Post implements InputFilterAwareInterface
         $this->id = !empty($data['id']) ? $data['id'] : null;
         $this->title = !empty($data['title']) ? $data['title'] : null;
         $this->description = !empty($data['description']) ? $data['description'] : null;
-        $this->created_at = !empty($data['created_at']) ? $data['created_at'] : null;
+        if (!empty($data['created_at'])){
+            $timeService = new TimeService($data['created_at']);
+            $this->created_at = $timeService->dateToShamsi();
+        }
+//        $this->created_at = !empty($data['created_at']) ? $data['created_at'] : null;
         $this->user = !empty($data['user']) ? $data['user'] : null;
     }
     public function getArrayCopy()
