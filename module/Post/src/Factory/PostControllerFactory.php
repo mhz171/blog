@@ -13,7 +13,7 @@ class PostControllerFactory implements FactoryInterface
     public function __invoke(ContainerInterface|\Psr\Container\ContainerInterface $container, $requestedName, array $options = null)
     {
         $table = $container->get(PostTable::class);
-        $postService = $container->get(PostService::class);
-        return new PostController($table, $postService);
+        // $postService = $container->get(PostService::class);
+        return new PostController($table);
     }
 }

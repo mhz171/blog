@@ -12,7 +12,6 @@ use Post\Service\PostService;
 class PostController extends AbstractActionController
 {
     private $table;
-    private $postService;
     public function __construct(PostTable $table){
         $this->table = $table;
     }
@@ -40,8 +39,13 @@ class PostController extends AbstractActionController
 //            ]);
 //        }
         $post = new Post();
+        
+
         $form->setInputFilter($post->getInputFilter());
         $form->setData($request->getPost());
+
+        $postService = new PostService($form);
+        // $validationResult = $postService->isValid();
 
         if (! $form->isValid()) {
             return ['form' => $form];

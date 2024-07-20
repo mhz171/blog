@@ -23,10 +23,12 @@ use Laminas\Db\TableGateway\TableGateway;
             'factories' => [
                 PostController::class => function ($container) {
                     return new PostController($container->get(PostTable::class));
-                }
+                },
             ]
         ];
     }
+
+
     public function getServiceConfig()
     {
         return [
@@ -41,9 +43,10 @@ use Laminas\Db\TableGateway\TableGateway;
                     $resultSetPrototype->setArrayObjectPrototype(new Post());
                     return new TableGateway('posts', $dbAdapter, null, $resultSetPrototype);
                 },
-                PostService::class => function ($container) {
-                    return new PostService($container->get(Post::class));
-                },
+                // PostService::class => function ($container) {
+                //     return new PostService($container->get(Post::class));
+                // },
+                Post\Service\PostService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
             ],
         ];
     }
