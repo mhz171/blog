@@ -2,6 +2,7 @@
 
 namespace Post;
 
+use Post\Factory\PostControllerFactory;
 use Post\Model\PostTable;
 use Post\Model\Post;
 use Laminas\ModuleManager\Feature\ConfigProviderInterface;
@@ -21,9 +22,7 @@ use Laminas\Db\TableGateway\TableGateway;
     {
         return [
             'factories' => [
-                PostController::class => function ($container) {
-                    return new PostController($container->get(PostTable::class));
-                },
+                PostController::class => PostControllerFactory::class,
             ]
         ];
     }
