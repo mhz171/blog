@@ -2,7 +2,9 @@
 
 namespace Post\Model;
 
+use Laminas\Form\Form;
 use Post\Model\Post;
+use Post\Service\PostService;
 use RuntimeException;
 use Laminas\Db\TableGateway\TableGatewayInterface;
 class PostTable{
@@ -29,10 +31,15 @@ class PostTable{
         $data = [
             'title' => $post->title,
             'description' => $post->description,
+            'user' => $post->user,
         ];
         
         $id = (int) $post->id;
         if ($id === 0){
+
+            $postService = new PostService(new Form());
+            $time = $postService->timeToShamsi();
+            $data['created_at'] = $time;
             $this->tableGateway->insert($data);
             return;
         }
