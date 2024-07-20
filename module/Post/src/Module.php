@@ -41,6 +41,9 @@ use Laminas\Db\TableGateway\TableGateway;
                     $resultSetPrototype->setArrayObjectPrototype(new Post());
                     return new TableGateway('posts', $dbAdapter, null, $resultSetPrototype);
                 },
+                PostService::class => function ($container) {
+                    return new PostService($container->get(Post::class));
+                },
             ],
         ];
     }

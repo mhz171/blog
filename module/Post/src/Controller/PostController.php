@@ -7,10 +7,12 @@ use Laminas\View\Model\ViewModel;
 use Post\Model\PostTable;
 use Post\Form\PostForm;
 use Post\Model\Post;
+use Post\Service\PostService;
 
 class PostController extends AbstractActionController
 {
     private $table;
+    private $postService;
     public function __construct(PostTable $table){
         $this->table = $table;
     }
@@ -28,7 +30,15 @@ class PostController extends AbstractActionController
         if (! $request->isPost()) {
             return ['form' => $form];
         }
-
+//        $data = $this->params()->fromPost();
+//
+//        $validationResult = $this->postService->validatePostData();
+//        if ($validationResult['status'] == 'error') {
+//            return new ViewModel([
+//                'form' => $form,
+//                'errors' => $validationResult['messages'],
+//            ]);
+//        }
         $post = new Post();
         $form->setInputFilter($post->getInputFilter());
         $form->setData($request->getPost());
