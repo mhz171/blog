@@ -3,8 +3,11 @@
 $title = 'Edit post';
 $this->headTitle($title);
 ?>
-    <h1><?= $this->escapeHtml($title) ?></h1>
+<h1><?= $this->escapeHtml($title) ?></h1>
 <?php
+// Assuming $post is the post data retrieved from the database
+// and $postImagePath contains the path to the current image
+
 $post = $form->get('title');
 $post->setAttribute('class', 'form-control');
 $post->setAttribute('placeholder', 'post title');
@@ -13,10 +16,13 @@ $description = $form->get('description');
 $description->setAttribute('class', 'form-control');
 $description->setAttribute('placeholder', 'description');
 
+$image1 = $form->get('image');
+
+// Add file input for image upload
 $image = new \Laminas\Form\Element\File('image');
 $image->setAttribute('class', 'form-control');
 $image->setAttribute('accept', 'image/*');
-$image->setLabel('Upload Image');
+$image->setLabel('Upload Image (Leave empty to keep current image)');
 $form->add($image);
 
 $submit = $form->get('submit');
@@ -26,24 +32,45 @@ $form->setAttribute('action', $this->url('post', [
     'action' => 'edit',
     'id'     => $id,
 ]));
+$form->setAttribute('enctype', 'multipart/form-data'); // Important for file uploads
 $form->prepare();
 
 echo $this->form()->openTag($form);
 ?>
-    <div class="form-group">
-        <?= $this->formLabel($post) ?>
-        <?= $this->formElement($post) ?>
-        <?= $this->formElementErrors()->render($post, ['class' => 'help-block']) ?>
-    </div>
 
-    <div class="form-group">
-        <?= $this->formLabel($description) ?>
-        <?= $this->formElement($description) ?>
-        <?= $this->formElementErrors()->render($description, ['class' => 'help-block']) ?>
-    </div>
+<div class="form-group">
+    <?= $this->formLabel($post) ?>
+    <?= $this->formElement($post) ?>
+    <?= $this->formElementErrors()->render($post, ['class' => 'help-block']) ?>
+</div>
 
+<div class="form-group">
+    <?= $this->formLabel($description) ?>
+    <?= $this->formElement($description) ?>
+    <?= $this->formElementErrors()->render($description, ['class' => 'help-block']) ?>
+</div>
+
+
+
+<div class="form-group">
+    <label>Current Image:</label>
+<!--    <td>--><?php //=$this->escapeHtml($form->get('image')) ?><!--</td>-->
+    <?php if ($image1->getValue()) : ?>
+
+        <img src="<?= $this->basePath(substr($image1->getValue(), 8)) ?>" alt = "" width="100">
+    <?php else: ?>
+        <p>No image available.</p>
+    <?php endif; ?>
+</div>
+
+<div class="form-group">
+    <?= $this->formLabel($image) ?>
+    <?= $this->formElement($image) ?>
+    <?= $this->formElementErrors()->render($image, ['class' => 'help-block']) ?>
+</div>
 
 <?php
 echo $this->formSubmit($submit);
 echo $this->formHidden($form->get('id'));
 echo $this->form()->closeTag();
+?>

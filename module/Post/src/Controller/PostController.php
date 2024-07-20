@@ -48,14 +48,8 @@ class PostController extends AbstractActionController
 
             // Define the target directory and file name
             $targetDir = './public/img/';
-            $lastId = $this->table->getLastId();
-            $lastId = !empty($lastId) ? $lastId + 1 : 1;
             $image = $targetDir . basename($file['name']) ;
-            $i = 1;
-            while (file_exists($image) ) {
-                $image = $targetDir . $lastId*$i . "." . "jpg";
-                $i++;
-            }
+
             // Ensure the directory exists
             if (!file_exists($targetDir)) {
                 mkdir($targetDir, 0777, true);
@@ -107,6 +101,32 @@ class PostController extends AbstractActionController
 
         if (!$form->isValid()) {
             return $viewData;
+        }
+        $fileData = $request->getFiles();
+        $image ="";
+
+        if ($form->isValid() && $fileData['image']['error'] == UPLOAD_ERR_OK) {
+            // Handle file upload
+            $data = $form->getData();
+            $file = $fileData['image'];
+
+            // Define the target directory and file name
+            $targetDir = './public/img/';
+            $image = $targetDir . basename($file['name']) ;
+
+            // Ensure the directory exists
+            if (!file_exists($targetDir)) {
+                mkdir($targetDir, 0777, true);
+            }
+//
+//            // Move the uploaded file to the target directory
+            if (!move_uploaded_file($file['tmp_name'], $image)) {
+                $form->get('image')->setMessages(['File upload failed.']);
+            }
+//
+        }
+        if ($image != ""){
+            $post->image = $image;
         }
 
         $this->table->savePost($post);
