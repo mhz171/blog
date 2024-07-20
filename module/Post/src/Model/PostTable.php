@@ -56,21 +56,6 @@ class PostTable{
         $this->tableGateway->delete(['id' => (int)$id]);
     }
 
-    public function getLastId()
-    {
-        $select = new Select();
-        $select->from($this->tableGateway->getTable());
-        $select->order('id DESC');
-        $select->limit(1);
 
-        $resultSet = $this->tableGateway->selectWith($select);
-        $row = $resultSet->current();
-
-        if ($row) {
-            return $row->id;
-        } else {
-            return null;
-        }
-    }
 
 }

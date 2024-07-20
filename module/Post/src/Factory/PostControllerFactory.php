@@ -2,6 +2,7 @@
 
 namespace Post\Factory;
 
+use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Post\Controller\PostController;
@@ -12,8 +13,7 @@ class PostControllerFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $table = $container->get(PostTable::class);
-        // $postService = $container->get(PostService::class);
-        return new PostController($table);
+        $entityManager = $container->get(EntityManager::class);
+        return new PostController($entityManager);
     }
 }

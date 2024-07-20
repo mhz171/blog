@@ -20,19 +20,18 @@ $this->headTitle($title);
 
     <?php foreach ($posts as $post) : ?>
         <tr>
-            <td><?= $this->escapeHtml($post->title) ?></td>
-            <td><?= $this->escapeHtml($post->description) ?></td>
-            <td><?= $this->escapeHtml($post->created_at) ?></td>
-            <td><?= $this->escapeHtml($post->user) ?></td>
+            <td><?= $this->escapeHtml($post->getTitle()) ?></td>
+            <td><?= $this->escapeHtml($post->getDescription()) ?></td>
+            <td><?= $this->escapeHtml($post->getFormattedCreatedAt()) ?></td>
+            <td><?= $this->escapeHtml($post->getUser()) ?></td>
             <td>
-                <?php if (!empty($post->image)) : ?>
-<!--                    <td>--><?php //=$this->escapeHtml($this->basePath(substr($post->image, 8))) ?><!--</td>-->
-                    <img src=".<?= $this->basePath(substr($post->image, 8)) ?>" alt="<?= $this->escapeHtmlAttr($post->title) ?>" width="100">
+                <?php if (!empty($post->getImage())) : ?>
+                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->getImage(), 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->getTitle()) ?>" width="100">
                 <?php endif; ?>
             </td>
             <td>
-                <a href="<?= $this->url('post', ['action' => 'edit', 'id' => $post->id]) ?>">Edit</a>
-                <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post->id]) ?>">Delete</a>
+                <a href="<?= $this->url('post', ['action' => 'edit', 'id' => $post->getId()]) ?>">Edit</a>
+                <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post->getId()]) ?>">Delete</a>
             </td>
         </tr>
     <?php endforeach; ?>

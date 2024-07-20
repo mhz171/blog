@@ -36,14 +36,15 @@ class Post implements InputFilterAwareInterface
     public function getArrayCopy()
     {
         return [
-            'id'     => $this->id,
-            'description' => $this->description,
-            'title'  => $this->title,
-            'created_at' => $this->created_at,
-            'user'  => $this->user,
-            'image' => $this->image,
+            'id' => $this->getId(),
+            'description' => $this->getDescription(),
+            'title' => $this->getTitle(),
+            'created_at' => $this->getCreatedAt(),
+            'user' => $this->getUser(),
+            'image' => $this->getImage(),
         ];
     }
+
     public function setInputFilter(InputFilterInterface $inputFilter)
     {
         throw new DomainException(sprintf(
