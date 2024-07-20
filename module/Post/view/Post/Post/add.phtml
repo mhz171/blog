@@ -14,6 +14,11 @@ $description = $form->get('description');
 $description->setAttribute('class', 'form-control');
 $description->setAttribute('placeholder', 'description');
 
+// This provides a default CSS class and placeholder text for the user element:
+$user = $form->get('user');
+$user->setAttribute('class', 'form-control');
+$user->setAttribute('placeholder', 'user');
+
 // This provides CSS classes for the submit button:
 $submit = $form->get('submit');
 $submit->setAttribute('class', 'btn btn-primary');
@@ -23,9 +28,9 @@ $form->prepare();
 
 echo $this->form()->openTag($form);
 ?>
-<?php 
-	  // Wrap the elements in divs marked as form groups, and render the
-      // label, element, and errors separately within 
+<?php
+// Wrap the elements in divs marked as form groups, and render the
+// label, element, and errors separately within
 ?>
 <div class="form-group">
     <?= $this->formLabel($post) ?>
@@ -39,7 +44,14 @@ echo $this->form()->openTag($form);
     <?= $this->formElementErrors()->render($description, ['class' => 'help-block']) ?>
 </div>
 
+<div class="form-group">
+    <?= $this->formLabel($user) ?>
+    <?= $this->formElement($user) ?>
+    <?= $this->formElementErrors()->render($user, ['class' => 'help-block']) ?>
+</div>
+
 <?php
 echo $this->formSubmit($submit);
 echo $this->formHidden($form->get('id'));
 echo $this->form()->closeTag();
+?>
