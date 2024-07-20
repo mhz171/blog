@@ -15,4 +15,5 @@ class PostService
     {
         return $this->postForm->isValid();
     }
+
 }

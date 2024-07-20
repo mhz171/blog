@@ -45,9 +45,9 @@ class PostController extends AbstractActionController
         $form->setData($request->getPost());
 
         $postService = new PostService($form);
-        // $validationResult = $postService->isValid();
+         $validationResult = $postService->isValid();
 
-        if (! $form->isValid()) {
+        if (! $validationResult) {
             return ['form' => $form];
         }
 

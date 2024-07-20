@@ -3,6 +3,8 @@
 namespace Post;
 
 use Post\Factory\PostControllerFactory;
+use Post\Factory\PostTableFactory;
+use Post\Factory\PostTableGatewayFactory;
 use Post\Model\PostTable;
 use Post\Model\Post;
 use Laminas\ModuleManager\Feature\ConfigProviderInterface;
@@ -32,19 +34,8 @@ use Laminas\Db\TableGateway\TableGateway;
     {
         return [
             'factories' => [
-                PostTable::class => function ($container) {
-                    $tableGateway = $container->get(Model\PostTableGateway::class);
-                    return new PostTable($tableGateway);
-                },
-                Model\PostTableGateway::class => function ($container) {
-                    $dbAdapter = $container->get(AdapterInterface::class);
-                    $resultSetPrototype = new ResultSet();
-                    $resultSetPrototype->setArrayObjectPrototype(new Post());
-                    return new TableGateway('posts', $dbAdapter, null, $resultSetPrototype);
-                },
-                // PostService::class => function ($container) {
-                //     return new PostService($container->get(Post::class));
-                // },
+                PostTable::class => PostTableFactory::class,
+                Model\PostTableGateway::class => PostTableGatewayFactory::class,
                 Post\Service\PostService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
             ],
         ];
