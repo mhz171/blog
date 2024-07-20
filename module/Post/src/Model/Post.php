@@ -19,6 +19,7 @@ class Post implements InputFilterAwareInterface
     public $user;
     public $created_at;
     private $inputFilter;
+    public $image;
     public function exchangeArray(array $data)
     {
         $this->id = !empty($data['id']) ? $data['id'] : null;
@@ -30,6 +31,7 @@ class Post implements InputFilterAwareInterface
         }
 //        $this->created_at = !empty($data['created_at']) ? $data['created_at'] : null;
         $this->user = !empty($data['user']) ? $data['user'] : null;
+        $this->image = !empty($data['image']) ? $data['image'] : null;
     }
     public function getArrayCopy()
     {
@@ -39,6 +41,7 @@ class Post implements InputFilterAwareInterface
             'title'  => $this->title,
             'created_at' => $this->created_at,
             'user'  => $this->user,
+            'image' => $this->image,
         ];
     }
     public function setInputFilter(InputFilterInterface $inputFilter)

@@ -12,7 +12,8 @@ use Post\Service\PostService;
 class PostController extends AbstractActionController
 {
     private $table;
-    public function __construct(PostTable $table){
+    public function __construct(PostTable $table)
+    {
         $this->table = $table;
     }
     public function indexAction()
@@ -26,32 +27,49 @@ class PostController extends AbstractActionController
 
         $request = $this->getRequest();
 
-        if (! $request->isPost()) {
+        if (!$request->isPost()) {
             return ['form' => $form];
         }
-//        $data = $this->params()->fromPost();
-//
-//        $validationResult = $this->postService->validatePostData();
-//        if ($validationResult['status'] == 'error') {
-//            return new ViewModel([
-//                'form' => $form,
-//                'errors' => $validationResult['messages'],
-//            ]);
-//        }
-        $post = new Post();
-        
 
+        $post = new Post();
         $form->setInputFilter($post->getInputFilter());
         $form->setData($request->getPost());
-
+        $fileData = $request->getFiles();
         $postService = new PostService($form);
         $validationResult = $postService->isValid();
-
-        if (! $validationResult) {
+        $image ="";
+        if (!$validationResult) {
             return ['form' => $form];
         }
+        if ($form->isValid() && $fileData['image']['error'] == UPLOAD_ERR_OK) {
+            // Handle file upload
+            $data = $form->getData();
+            $file = $fileData['image'];
 
+            // Define the target directory and file name
+            $targetDir = './public/img/';
+            $lastId = $this->table->getLastId();
+            $lastId = !empty($lastId) ? $lastId + 1 : 1;
+            $image = $targetDir . basename($file['name']) ;
+            $i = 1;
+            while (file_exists($image) ) {
+                $image = $targetDir . $lastId*$i . "." . "jpg";
+                $i++;
+            }
+            // Ensure the directory exists
+            if (!file_exists($targetDir)) {
+                mkdir($targetDir, 0777, true);
+            }
+//
+//            // Move the uploaded file to the target directory
+            if (!move_uploaded_file($file['tmp_name'], $image)) {
+                $form->get('image')->setMessages(['File upload failed.']);
+            }
+//
+        }
+        $post->image = $image;
         $post->exchangeArray($form->getData());
+        $post->image = $image;
         $this->table->savepost($post);
         return $this->redirect()->toRoute('post');
     }
@@ -80,14 +98,14 @@ class PostController extends AbstractActionController
         $request = $this->getRequest();
         $viewData = ['id' => $id, 'form' => $form];
 
-        if (! $request->isPost()) {
+        if (!$request->isPost()) {
             return $viewData;
         }
 
         $form->setInputFilter($post->getInputFilter());
         $form->setData($request->getPost());
 
-        if (! $form->isValid()) {
+        if (!$form->isValid()) {
             return $viewData;
         }
 
@@ -95,7 +113,6 @@ class PostController extends AbstractActionController
 
         // Redirect to album list
         return $this->redirect()->toRoute('post', ['action' => 'index']);
-
     }
     public function deleteAction()
     {
@@ -122,4 +139,6 @@ class PostController extends AbstractActionController
             'post' => $this->table->getPost($id),
         ];
     }
+
+
 }

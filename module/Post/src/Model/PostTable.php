@@ -2,6 +2,7 @@
 
 namespace Post\Model;
 
+use Laminas\Db\Sql\Select;
 use Laminas\Form\Form;
 use Post\Model\Post;
 use Post\Service\PostService;
@@ -33,6 +34,7 @@ class PostTable{
             'title' => $post->title,
             'description' => $post->description,
             'user' => $post->user,
+            'image' => $post->image,
         ];
         
         $id = (int) $post->id;
@@ -52,6 +54,23 @@ class PostTable{
 
     public function deletePost ($id){
         $this->tableGateway->delete(['id' => (int)$id]);
+    }
+
+    public function getLastId()
+    {
+        $select = new Select();
+        $select->from($this->tableGateway->getTable());
+        $select->order('id DESC');
+        $select->limit(1);
+
+        $resultSet = $this->tableGateway->selectWith($select);
+        $row = $resultSet->current();
+
+        if ($row) {
+            return $row->id;
+        } else {
+            return null;
+        }
     }
 
 }

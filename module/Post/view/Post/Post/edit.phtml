@@ -13,6 +13,12 @@ $description = $form->get('description');
 $description->setAttribute('class', 'form-control');
 $description->setAttribute('placeholder', 'description');
 
+$image = new \Laminas\Form\Element\File('image');
+$image->setAttribute('class', 'form-control');
+$image->setAttribute('accept', 'image/*');
+$image->setLabel('Upload Image');
+$form->add($image);
+
 $submit = $form->get('submit');
 $submit->setAttribute('class', 'btn btn-primary');
 
@@ -35,6 +41,7 @@ echo $this->form()->openTag($form);
         <?= $this->formElement($description) ?>
         <?= $this->formElementErrors()->render($description, ['class' => 'help-block']) ?>
     </div>
+
 
 <?php
 echo $this->formSubmit($submit);

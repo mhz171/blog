@@ -30,6 +30,13 @@ class PostForm extends Form
             ],
         ]);
         $this->add([
+            'name' => 'image',
+            'type' => 'text',
+            'options' => [
+                'label' => 'image',
+            ],
+        ]);
+        $this->add([
             'name' => 'user',
             'type' => 'text',
             'options' => [
