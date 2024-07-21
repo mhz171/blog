@@ -67,7 +67,6 @@ class PostController extends AbstractActionController
             }
         }
 
-        $post->setImage($image);
         $post->setTitle($form->get('title')->getValue());
         $post->setDescription($form->get('description')->getValue());
         $post->setUser($form->get('user')->getValue());

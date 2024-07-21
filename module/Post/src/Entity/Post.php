@@ -189,10 +189,6 @@ class Post implements InputFilterAwareInterface
         $this->id = !empty($data['id']) ? $data['id'] : null;
         $this->title = !empty($data['title']) ? $data['title'] : null;
         $this->description = !empty($data['description']) ? $data['description'] : null;
-//        if (!empty($data['created_at'])){
-//            $timeService = new TimeService($data['created_at']);
-//            $this->created_at = $timeService->dateToShamsi();
-//        }
         $this->created_at = !empty($data['created_at']) ? $data['created_at'] : null;
         $this->user = !empty($data['user']) ? $data['user'] : null;
         $this->image = !empty($data['image']) ? $data['image'] : null;

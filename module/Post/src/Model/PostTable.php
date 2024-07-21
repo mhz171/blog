@@ -56,6 +56,4 @@ class PostTable{
         $this->tableGateway->delete(['id' => (int)$id]);
     }
 
-
-
 }

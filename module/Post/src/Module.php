@@ -9,10 +9,7 @@ use Post\Model\PostTable;
 use Post\Model\Post;
 use Laminas\ModuleManager\Feature\ConfigProviderInterface;
 use Post\Controller\PostController;
-use Laminas\Db\Adapter\AdapterInterface;
-use Laminas\Db\ResultSet\ResultSet;
-use Laminas\Db\TableGateway\TableGateway;
-// use Model\PostTableGateway;
+
 
  class Module implements ConfigProviderInterface
 {
