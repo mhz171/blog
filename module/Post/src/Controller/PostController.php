@@ -9,6 +9,7 @@ use Post\Entity\Post;
 use Post\Form\PostForm;
 use Post\Service\PostService;
 
+
 class PostController extends AbstractActionController
 {
     private $entityManager;
@@ -38,51 +39,85 @@ class PostController extends AbstractActionController
         $post = new Post();
         $form->setInputFilter($post->getInputFilter());
         $form->setData($request->getPost());
-        $fileData = $request->getFiles();
+
         $postService = new PostService($form);
         $validationResult = $postService->isValid();
-        $image = "";
+
 
         if (!$validationResult) {
             return ['form' => $form];
         }
-
-        if ($form->isValid() && $fileData['image']['error'] == UPLOAD_ERR_OK) {
-            // Handle file upload
-            $data = $form->getData();
-            $file = $fileData['image'];
-
-            // Define the target directory and file name
-            $targetDir = './public/img/';
-            $image = $targetDir . basename($file['name']);
-
-            // Ensure the directory exists
-            if (!file_exists($targetDir)) {
-                mkdir($targetDir, 0777, true);
-            }
-
-            // Move the uploaded file to the target directory
-            if (!move_uploaded_file($file['tmp_name'], $image)) {
-                $form->get('image')->setMessages(['File upload failed.']);
-            }
-        }
-
         $post->setTitle($form->get('title')->getValue());
         $post->setDescription($form->get('description')->getValue());
         $post->setUser($form->get('user')->getValue());
-        $post->setImage($image);
         date_default_timezone_set("Asia/Tehran");
         $post->setCreatedAt(\DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
 
         $this->entityManager->persist($post);
         $this->entityManager->flush();
 
+        $image = "";
+        $fileData = $request->getFiles();
+
+        if ($form->isValid() && $fileData['image']['error'] == UPLOAD_ERR_OK) {
+            // Handle file upload
+            $data = $form->getData();
+            $file = $fileData['image'];
+//
+//            // Define the target directory and file name
+//            $targetDir = './public/img/';
+//            $image = $targetDir . basename($file['name']);
+//            $image = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
+//            // Ensure the directory exists
+//            if (!file_exists($targetDir)) {
+//                mkdir($targetDir, 0777, true);
+//            }
+//
+//            // Move the uploaded file to the target directory
+//            if (!move_uploaded_file($file['tmp_name'], $image)) {
+//                $form->get('image')->setMessages(['File upload failed.']);
+//            }
+
+
+            $uploadDir = './public/img/';
+            $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
+            $newFileName = $post->getId() . '.' . $extension;
+            $image = $uploadDir . $newFileName;
+//
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+//            $post->setImage($image);
+//            $this->entityManager->flush();
+            if (move_uploaded_file($file['tmp_name'], $image)) {
+                // Update the post with the new image path
+                $post->setImage($image);
+                $this->entityManager->flush(); // Save the updated post
+            } else {
+                // Handle file upload error
+                echo "Error uploading the file.";
+            }
+//            if (!file_exists($uploadDir)) {
+//                mkdir($uploadDir, 0777, true);
+//            }
+//
+//            // Move the uploaded file to the target directory
+//            if (!move_uploaded_file($file['tmp_name'], $image)) {
+//                $form->get('image')->setMessages(['File upload failed.']);
+//            }
+        }
+//        $post->setImage($image);
+
+
+//        $this->entityManager->persist($post);
+//        $this->entityManager->flush();
+
         return $this->redirect()->toRoute('post');
     }
 
     public function editAction()
     {
-        $id = (int) $this->params()->fromRoute('id', 0);
+        $id = (int)$this->params()->fromRoute('id', 0);
 
         if (0 === $id) {
             return $this->redirect()->toRoute('post', ['action' => 'add']);
@@ -147,7 +182,7 @@ class PostController extends AbstractActionController
 
     public function deleteAction()
     {
-        $id = (int) $this->params()->fromRoute('id', 0);
+        $id = (int)$this->params()->fromRoute('id', 0);
         if (!$id) {
             return $this->redirect()->toRoute('post');
         }
@@ -157,8 +192,13 @@ class PostController extends AbstractActionController
             $del = $request->getPost('del', 'No');
 
             if ($del == 'Yes') {
-                $id = (int) $request->getPost('id');
+                $id = (int)$request->getPost('id');
                 $post = $this->entityManager->getRepository(Post::class)->find($id);
+
+                $file_path = $post->getImage();
+                if (file_exists($file_path)) {
+                    unlink($file_path);
+                }
                 $this->entityManager->remove($post);
                 $this->entityManager->flush();
             }
@@ -167,7 +207,7 @@ class PostController extends AbstractActionController
         }
 
         return [
-            'id'    => $id,
+            'id' => $id,
             'post' => $this->entityManager->getRepository(Post::class)->find($id),
         ];
     }
