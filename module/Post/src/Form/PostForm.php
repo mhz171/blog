@@ -37,13 +37,6 @@ class PostForm extends Form
             ],
         ]);
         $this->add([
-            'name' => 'user',
-            'type' => 'text',
-            'options' => [
-                'label' => 'user',
-            ],
-        ]);
-        $this->add([
             'name' => 'submit',
             'type' => 'submit',
             'attributes' => [

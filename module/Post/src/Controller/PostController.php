@@ -75,7 +75,8 @@ class PostController extends AbstractActionController
         }
         $post->setTitle($form->get('title')->getValue());
         $post->setDescription($form->get('description')->getValue());
-        $post->setUser($form->get('user')->getValue());
+//        TODO: setUser
+        $post->setUser(1);
         date_default_timezone_set("Asia/Tehran");
         $post->setCreatedAt(\DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
 

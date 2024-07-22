@@ -14,10 +14,6 @@ $description = $form->get('description');
 $description->setAttribute('class', 'form-control');
 $description->setAttribute('placeholder', 'description');
 
-// This provides a default CSS class and placeholder text for the user element:
-$user = $form->get('user');
-$user->setAttribute('class', 'form-control');
-$user->setAttribute('placeholder', 'user');
 
 // This provides CSS classes for the submit button:
 $submit = $form->get('submit');
@@ -50,12 +46,6 @@ echo $this->form()->openTag($form);
     <?= $this->formLabel($description) ?>
     <?= $this->formElement($description) ?>
     <?= $this->formElementErrors()->render($description, ['class' => 'help-block']) ?>
-</div>
-
-<div class="form-group">
-    <?= $this->formLabel($user) ?>
-    <?= $this->formElement($user) ?>
-    <?= $this->formElementErrors()->render($user, ['class' => 'help-block']) ?>
 </div>
 
 <div class="form-group">

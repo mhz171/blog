@@ -31,10 +31,6 @@ class Post implements InputFilterAwareInterface
      */
     public $description;
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    public $user;
 
     /**
      * @ORM\Column(type="string")
@@ -46,9 +42,23 @@ class Post implements InputFilterAwareInterface
      */
     public $created_at;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    public $user;
+
     public $inputFilter;
 
     // Add getters and setters for each property
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+    public function setUser($user)
+    {
+        $this->user = $user;
+    }
 
     public function getId()
     {
@@ -75,15 +85,6 @@ class Post implements InputFilterAwareInterface
         $this->description = $description;
     }
 
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    public function setUser($user)
-    {
-        $this->user = $user;
-    }
 
     public function getImage()
     {
@@ -142,24 +143,6 @@ class Post implements InputFilterAwareInterface
                 ],
             ]);
 
-//            $inputFilter->add([
-//                'name' => 'user',
-//                'required' => true,
-//                'filters' => [
-//                    ['name' => 'StringTrim'],
-//                    ['name' => 'StripTags'],
-//                ],
-//                'validators' => [
-//                    [
-//                        'name' => 'StringLength',
-//                        'options' => [
-//                            'encoding' => 'UTF-8',
-//                            'min' => 1,
-//                            'max' => 255,
-//                        ],
-//                    ],
-//                ],
-//            ]);
 
             $inputFilter->add([
                 'name' => 'description',
@@ -180,7 +163,6 @@ class Post implements InputFilterAwareInterface
                 ],
             ]);
 
-
             $inputFilter->add([
                 'name' => 'image',
                 'required' => false,
@@ -199,8 +181,8 @@ class Post implements InputFilterAwareInterface
             'description' => $this->getDescription(),
             'title' => $this->getTitle(),
             'created_at' => $this->getCreatedAt(),
-            'user' => $this->getUser(),
             'image' => $this->getImage(),
+            'user' => $this->getUser(),
         ];
     }
 
@@ -210,7 +192,7 @@ class Post implements InputFilterAwareInterface
         $this->title = !empty($data['title']) ? $data['title'] : null;
         $this->description = !empty($data['description']) ? $data['description'] : null;
         $this->created_at = !empty($data['created_at']) ? $data['created_at'] : null;
-        $this->user = !empty($data['user']) ? $data['user'] : null;
         $this->image = !empty($data['image']) ? $data['image'] : null;
+        $this->user = !empty($data['user']) ? $data['user'] : null;
     }
 }

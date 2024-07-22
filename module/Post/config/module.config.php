@@ -40,20 +40,6 @@ return [
         'template_path_stack' => [
             'post' => __DIR__ . '/../view',
         ],
-//        'template_map' => [
-//            'layout/layout'           => __DIR__ . '/../view/layout/layout.phtml',
-//            'post/index/index'        => __DIR__ . '/../view/post/post/index.phtml',
-//            'partial/paginator'       => __DIR__ . '/../view/post/partial/paginator.phtml',
-//        ],
-
     ],
-//    'view_helpers' => [
-//        'factories' => [
-//            Laminas\View\Helper\PaginationControl::class => Laminas\ServiceManager\Factory\InvokableFactory::class,
-//        ],
-//        'aliases' => [
-//            'paginationControl' => Laminas\View\Helper\PaginationControl::class,
-//        ],
-//    ],
 ];
 
