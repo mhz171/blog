@@ -17,7 +17,7 @@ $this->headTitle($title);
         <th>&nbsp;</th>
     </tr>
 
-    <?php foreach ($paginator as $post) : ?>
+    <?php foreach ($this->paginator as $post) : ?>
         <tr>
             <td><?= $this->escapeHtml($post->getTitle()) ?></td>
             <td><?= $this->escapeHtml($post->getDescription()) ?></td>
@@ -38,4 +38,12 @@ $this->headTitle($title);
 
 
 
-<?= $this->partial('partial/paginator', ['paginator' => $posts]); ?>
+<?= $this->partial('partial/paginator', ['paginator' => $this->posts]); ?>
+
+
+<?php //foreach ($posts as $post): ?>
+<!--    <h2>--><?php //= $post->getTitle(); ?><!--</h2>-->
+<!--    <p>--><?php //echo $post->getDescription(); ?><!--</p>-->
+<!--    <p><strong>Author:</strong> --><?php //echo $post->getUser()->getUsername(); ?><!--</p>-->
+<!--    <hr>-->
+<?php //endforeach; ?>

@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Post\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -7,6 +8,7 @@ use Laminas\InputFilter\InputFilter;
 use Laminas\InputFilter\InputFilterAwareInterface;
 use Laminas\InputFilter\InputFilterInterface;
 use Post\Service\TimeService;
+use User\Entity\User;
 
 /**
  * @ORM\Entity
@@ -42,10 +44,9 @@ class Post implements InputFilterAwareInterface
      */
     public $created_at;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    public $user;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
+    private $user;
 
     public $inputFilter;
 
@@ -55,6 +56,7 @@ class Post implements InputFilterAwareInterface
     {
         return $this->user;
     }
+
     public function setUser($user)
     {
         $this->user = $user;

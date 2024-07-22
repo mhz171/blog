@@ -3,16 +3,15 @@
 namespace Post\Controller;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use Laminas\Mvc\Controller\AbstractActionController;
+use Laminas\Paginator\Adapter\ArrayAdapter;
+use Laminas\Paginator\Paginator;
 use Laminas\View\Model\ViewModel;
 use Post\Entity\Post;
 use Post\Form\PostForm;
 use Post\Service\PostService;
-
-
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
-use Laminas\Paginator\Paginator;
-use Laminas\Paginator\Adapter\ArrayAdapter;
+use User\Entity\User;
 
 
 class PostController extends AbstractActionController
@@ -26,28 +25,51 @@ class PostController extends AbstractActionController
 
     public function indexAction()
     {
-        $posts = $this->entityManager->getRepository(Post::class)->findAll();
+        try {
+            $page = $this->params()->fromQuery('page', 1);
+            $limit = 2; // تعداد پست‌ها در هر صفحه
+            $page = ($page < 1) ? 1 : $page;
+
+            // ساخت کوئری
+            $queryBuilder = $this->entityManager->createQueryBuilder();
+            $queryBuilder->select('p', 'u')
+                ->from(Post::class, 'p')
+                ->leftJoin('p.user', 'u');
+//                ->orderBy('p.created_at', 'ASC');
+
+//            $queryBuilder->select('p', 'u')
+//                ->from(Post::class, 'p')
+//                ->leftJoin('p.user', 'u')
+//                ->orderBy('p.created_at', 'ASC');
+
+//            $queryBuilder->select('p', 'u')
+//                ->from(Post::class, 'p')
+//                ->leftJoin(User::class, 'u', 'WITH', 'p.user = u.id')
+//                ->orderBy('p.created_at', 'ASC');
+
+            $query = $queryBuilder->getQuery();
+
+            // چاپ کوئری به شکل قابل فهم
+//            echo "<pre>" . $queryBuilder->getQuery()->getSQL() . "</pre>";
+
+            // تبدیل کوئری به DoctrinePaginator
+            $doctrinePaginator = new DoctrinePaginator($query);
+
+            // استفاده از ArrayAdapter برای ساخت Paginator
+            $paginator = new Paginator(new ArrayAdapter(iterator_to_array($doctrinePaginator)));
+            $paginator->setCurrentPageNumber($page);
+            $paginator->setItemCountPerPage($limit);
+
+            return new ViewModel([
+                'posts' => $paginator,
+                'paginator' => $paginator,
+            ]);
+
+        } catch (\Exception $e) {
+            // نمایش خطا در صورت بروز استثناء
+            echo "An error occurred: " . $e->getMessage();
+        }
 //
-//
-//        return new ViewModel(['posts' => $posts]);
-
-        $page = $this->params()->fromQuery('page', 1);
-        $limit = 2; // تعداد پست‌ها در هر صفحه
-        $page = ($page < 1) ? 1 : $page;
-
-        $query = $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
-            ->orderBy('p.created_at', 'ASC')
-            ->getQuery();
-
-        $doctrinePaginator = new DoctrinePaginator($query);
-        $paginator = new Paginator(new ArrayAdapter(iterator_to_array($doctrinePaginator)));
-        $paginator->setCurrentPageNumber($page);
-        $paginator->setItemCountPerPage($limit);
-
-        return new ViewModel([
-            'posts' => $paginator,
-            'paginator' => $paginator,
-        ]);
 
     }
 
