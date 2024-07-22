@@ -17,15 +17,49 @@ $this->headTitle($title);
         <th>&nbsp;</th>
     </tr>
 
+
     <?php foreach ($this->paginator as $post) : ?>
+<!--        --><?php //$post->setTitle('title') ?>
         <tr>
-            <td><?= $this->escapeHtml($post->getTitle()) ?></td>
-            <td><?= $this->escapeHtml($post->getDescription()) ?></td>
-            <td><?= $this->escapeHtml($post->getFormattedCreatedAt()) ?></td>
-            <td><?= $this->escapeHtml($post->getUser()) ?></td>
             <td>
-                <?php if (!empty($post->getImage())) : ?>
-                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->getImage(), 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->getTitle()) ?>" width="100">
+                <?php
+                try {
+                    echo $this->escapeHtml($post->title);
+                } catch (\Exception $e) {
+                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
+                }
+                ?>
+            </td>
+            <td>
+                <?php
+                try {
+                    echo $this->escapeHtml($post->getDescription());
+                } catch (\Exception $e) {
+                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
+                }
+                ?>
+            </td>
+            <td>
+                <?php
+                try {
+                    echo $this->escapeHtml($post->user->username);
+                } catch (\Exception $e) {
+                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
+                }
+                ?>
+            </td>
+            <td>
+                <?php
+                try {
+                    echo $this->escapeHtml($post->getFormattedCreatedAt());
+                } catch (\Exception $e) {
+                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
+                }
+                ?>
+            </td>
+            <td>
+                <?php if (!empty($post->image)) : ?>
+                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->image, 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->title) ?>" width="100">
                 <?php endif; ?>
             </td>
             <td>
@@ -34,16 +68,10 @@ $this->headTitle($title);
             </td>
         </tr>
     <?php endforeach; ?>
+
 </table>
 
 
 
 <?= $this->partial('partial/paginator', ['paginator' => $this->posts]); ?>
 
-
-<?php //foreach ($posts as $post): ?>
-<!--    <h2>--><?php //= $post->getTitle(); ?><!--</h2>-->
-<!--    <p>--><?php //echo $post->getDescription(); ?><!--</p>-->
-<!--    <p><strong>Author:</strong> --><?php //echo $post->getUser()->getUsername(); ?><!--</p>-->
-<!--    <hr>-->
-<?php //endforeach; ?>

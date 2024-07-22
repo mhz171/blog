@@ -4,10 +4,10 @@ namespace Post\Controller;
 
 use Doctrine\ORM\EntityManager;
 use DoctrineORMModule\Paginator\Adapter\DoctrinePaginator;
-use Laminas\Paginator\Paginator;
+//use Laminas\Paginator\Paginator;
 use Laminas\Paginator\Adapter\ArrayAdapter;
 use Laminas\Mvc\Controller\AbstractActionController;
-
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Laminas\View\Model\ViewModel;
 use Post\Entity\Post;
 use Post\Form\PostForm;
@@ -27,56 +27,52 @@ class PostController extends AbstractActionController
     public function indexAction()
     {
         try {
+            $postRepository = $this->entityManager->getRepository(Post::class);
+            $posts = $postRepository->findAll();
+//            $query = $posts->getQuery();
+            return new ViewModel([
+                'paginator' => $posts,
+            ]);
             $page = $this->params()->fromQuery('page', 1);
             $limit = 2; // تعداد پست‌ها در هر صفحه
             $page = ($page < 1) ? 1 : $page;
 
             // ساخت کوئری
             $queryBuilder = $this->entityManager->createQueryBuilder();
-//            $queryBuilder->select('p', 'u')
-//                ->from(Post::class, 'p')
-//                ->leftJoin('p.user', 'u')
-//                ->orderBy('p.created_at', 'ASC');
-////
-////            $queryBuilder->select('p', 'u')
-////                ->from(Post::class, 'p')
-////                ->leftJoin('p.user', 'u')
-////                ->orderBy('p.created_at', 'ASC');
 
             $queryBuilder->select('p', 'u')
                 ->from(Post::class, 'p')
                 ->leftJoin(User::class, 'u', 'WITH', 'p.user = u.id')
                 ->orderBy('p.created_at', 'ASC');
-//
+
+
             $query = $queryBuilder->getQuery();
-//            var_dump($this->entityManager->getRepository(Post::class)->findBy(['user' => 1]));
-            // چاپ کوئری به شکل قابل فهم
-            var_dump($queryBuilder->getQuery()->getSQL() );
+
+//            var_dump($queryBuilder->getQuery()->getSQL());
 
             // تبدیل کوئری به DoctrinePaginator
-//            $doctrinePaginator = new DoctrinePaginator($query);
-//            $doctrinePaginator = new DoctrinePaginator($query);
-//
-////             استفاده از ArrayAdapter برای ساخت Paginator
-//            $paginator = new Paginator(new ArrayAdapter(iterator_to_array($doctrinePaginator)));
-//            $paginator->setCurrentPageNumber($page);
-//            $paginator->setItemCountPerPage($limit);
-//
+            $doctrinePaginator = new Paginator($query, $fetchJoinCollection = true);
+
+            // استفاده از DoctrinePaginator برای ساخت Laminas Paginator
+            $paginator = new \Laminas\Paginator\Paginator(new DoctrinePaginator($doctrinePaginator));
+            $paginator->setCurrentPageNumber($page);
+            $paginator->setItemCountPerPage($limit);
+//            var_dump($paginator->getCurrentItems());
+            var_dump($paginator->getItem(2)->id);
             return new ViewModel([
-//                'posts' => $paginator,
-//                'paginator' => $paginator,
+                'posts' => $paginator,
+                'paginator' => $paginator,
             ]);
 
         } catch (\Exception $e) {
             // نمایش خطا در صورت بروز استثناء
             echo "An error occurred: " . $e->getMessage();
         }
-//
-
     }
 
     public function addAction()
     {
+        try {
         $form = new PostForm();
         $form->get('submit')->setValue('Add');
 
@@ -100,7 +96,7 @@ class PostController extends AbstractActionController
         $post->setTitle($form->get('title')->getValue());
         $post->setDescription($form->get('description')->getValue());
 //        TODO: setUser
-        $post->setUser(1);
+        $post->setUser($this->entityManager->getRepository(User::class)->find(1));
         date_default_timezone_set("Asia/Tehran");
         $post->setCreatedAt(\DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
 
@@ -135,6 +131,10 @@ class PostController extends AbstractActionController
         }
 
         return $this->redirect()->toRoute('post');
+        } catch (\Exception $e) {
+            // نمایش خطا در صورت بروز استثناء
+            echo "An error occurred: " . $e->getMessage();
+        }
     }
 
     public function editAction()

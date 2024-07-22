@@ -17,35 +17,45 @@ class Post implements InputFilterAwareInterface
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      */
-    private $id;
+    public $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="title", type="string")
      */
-    private $title;
+    public $title;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(name="description", type="text")
      */
-    private $description;
+    public $description;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="image", type="string")
      */
-    private $image;
+    public $image;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
-    private $created_at;
+    public $created_at;
 
+    // Add getters and setters for each property
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt($createdAt)
+    {
+        $this->created_at = $createdAt;
+    }
     /**
      * @ORM\ManyToOne(targetEntity= "User\Entity\User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
      */
-    private $user;
+    public $user;
 
     private $inputFilter;
 
@@ -86,15 +96,15 @@ class Post implements InputFilterAwareInterface
         $this->image = $image;
     }
 
-    public function getCreatedAt()
-    {
-        return $this->created_at;
-    }
-
-    public function setCreatedAt($createdAt)
-    {
-        $this->created_at = $CreatedAt;
-    }
+//    public function getCreatedAt()
+//    {
+//        return $this->created_at;
+//    }
+//
+//    public function setCreatedAt($createdAt)
+//    {
+//        $this->created_at = $CreatedAt;
+//    }
 
     public function getUser()
     {

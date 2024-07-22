@@ -13,32 +13,32 @@ class User
     /**
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
+     * @ORM\Column(name="id", type="integer")
      */
     private $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="username", type="string")
      */
     public $username;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="firstname", type="string")
      */
     public $firstname;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="lastname", type="string")
      */
     public $lastname;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(name="password", type="string")
      */
     public $password;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(name="created_att", type="datetime")
      */
     public $created_at;
 
