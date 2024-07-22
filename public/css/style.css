@@ -15,3 +15,29 @@
 .navbar li.active a {
     color: var(--bs-navbar-active-color);
 }
+
+
+.pagination-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination {
+    display: inline-block;
+}
+
+.pagination-link,
+.pagination-current {
+    margin: 0 5px;
+    padding: 8px 16px;
+    text-decoration: none;
+    color: #000;
+}
+
+.pagination-link:hover {
+    background-color: #ddd;
+}
+
+.pagination-current {
+    font-weight: bold;
+}

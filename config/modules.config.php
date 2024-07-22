@@ -20,7 +20,6 @@ return [
     'Laminas\Cache\Storage\Adapter\Memory',
     'DoctrineModule',
     'DoctrineORMModule',
-    'Application',
     'Post',
     
 ];

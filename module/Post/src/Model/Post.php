@@ -20,12 +20,13 @@ class Post implements InputFilterAwareInterface
     public $created_at;
     private $inputFilter;
     public $image;
+
     public function exchangeArray(array $data)
     {
         $this->id = !empty($data['id']) ? $data['id'] : null;
         $this->title = !empty($data['title']) ? $data['title'] : null;
         $this->description = !empty($data['description']) ? $data['description'] : null;
-        if (!empty($data['created_at'])){
+        if (!empty($data['created_at'])) {
             $timeService = new TimeService($data['created_at']);
             $this->created_at = $timeService->dateToShamsi();
         }
@@ -33,6 +34,7 @@ class Post implements InputFilterAwareInterface
         $this->user = !empty($data['user']) ? $data['user'] : null;
         $this->image = !empty($data['image']) ? $data['image'] : null;
     }
+
     public function getArrayCopy()
     {
         return [

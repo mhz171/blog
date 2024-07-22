@@ -6,10 +6,13 @@ class TimeService
 {
     private $time;
 
-    public function __construct(string $time){
+    public function __construct(string $time)
+    {
         $this->time = $time;
     }
-    public function gregorianToJalali($g_y, $g_m, $g_d) {
+
+    public function gregorianToJalali($g_y, $g_m, $g_d)
+    {
         $g_days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
         $j_days_in_month = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
 
@@ -55,7 +58,8 @@ class TimeService
         return [$jy, $jm, $jd];
     }
 
-    public function dateToShamsi() {
+    public function dateToShamsi()
+    {
         date_default_timezone_set("Asia/Tehran");
 
         list($g_y, $g_m, $g_d) = explode('-', date('Y-m-d', strtotime($this->time)));

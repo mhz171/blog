@@ -10,6 +10,11 @@ use Post\Form\PostForm;
 use Post\Service\PostService;
 
 
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use Laminas\Paginator\Paginator;
+use Laminas\Paginator\Adapter\ArrayAdapter;
+
+
 class PostController extends AbstractActionController
 {
     private $entityManager;
@@ -22,7 +27,28 @@ class PostController extends AbstractActionController
     public function indexAction()
     {
         $posts = $this->entityManager->getRepository(Post::class)->findAll();
-        return new ViewModel(['posts' => $posts]);
+//
+//
+//        return new ViewModel(['posts' => $posts]);
+
+        $page = $this->params()->fromQuery('page', 1);
+        $limit = 2; // تعداد پست‌ها در هر صفحه
+        $page = ($page < 1) ? 1 : $page;
+
+        $query = $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
+            ->orderBy('p.created_at', 'ASC')
+            ->getQuery();
+
+        $doctrinePaginator = new DoctrinePaginator($query);
+        $paginator = new Paginator(new ArrayAdapter(iterator_to_array($doctrinePaginator)));
+        $paginator->setCurrentPageNumber($page);
+        $paginator->setItemCountPerPage($limit);
+
+        return new ViewModel([
+            'posts' => $paginator,
+            'paginator' => $paginator,
+        ]);
+
     }
 
     public function addAction()
@@ -63,32 +89,16 @@ class PostController extends AbstractActionController
             // Handle file upload
             $data = $form->getData();
             $file = $fileData['image'];
-//
-//            // Define the target directory and file name
-//            $targetDir = './public/img/';
-//            $image = $targetDir . basename($file['name']);
-//            $image = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
-//            // Ensure the directory exists
-//            if (!file_exists($targetDir)) {
-//                mkdir($targetDir, 0777, true);
-//            }
-//
-//            // Move the uploaded file to the target directory
-//            if (!move_uploaded_file($file['tmp_name'], $image)) {
-//                $form->get('image')->setMessages(['File upload failed.']);
-//            }
-
 
             $uploadDir = './public/img/';
             $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
             $newFileName = $post->getId() . '.' . $extension;
             $image = $uploadDir . $newFileName;
-//
+
             if (!file_exists($uploadDir)) {
                 mkdir($uploadDir, 0777, true);
             }
-//            $post->setImage($image);
-//            $this->entityManager->flush();
+
             if (move_uploaded_file($file['tmp_name'], $image)) {
                 // Update the post with the new image path
                 $post->setImage($image);
@@ -97,20 +107,7 @@ class PostController extends AbstractActionController
                 // Handle file upload error
                 echo "Error uploading the file.";
             }
-//            if (!file_exists($uploadDir)) {
-//                mkdir($uploadDir, 0777, true);
-//            }
-//
-//            // Move the uploaded file to the target directory
-//            if (!move_uploaded_file($file['tmp_name'], $image)) {
-//                $form->get('image')->setMessages(['File upload failed.']);
-//            }
         }
-//        $post->setImage($image);
-
-
-//        $this->entityManager->persist($post);
-//        $this->entityManager->flush();
 
         return $this->redirect()->toRoute('post');
     }

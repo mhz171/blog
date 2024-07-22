@@ -48,7 +48,7 @@ class PostForm extends Form
             'type' => 'submit',
             'attributes' => [
                 'value' => 'Submit',
-                'id'    => 'submitbutton',
+                'id' => 'submitbutton',
             ],
         ]);
 

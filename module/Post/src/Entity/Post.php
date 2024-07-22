@@ -113,8 +113,9 @@ class Post implements InputFilterAwareInterface
     public function getFormattedCreatedAt()
     {
         if ($this->getCreatedAt() != null) {
-        $timeService = new TimeService($this->created_at->format('Y-m-d H:i:s'));
-        return $timeService->dateToShamsi();}
+            $timeService = new TimeService($this->created_at->format('Y-m-d H:i:s'));
+            return $timeService->dateToShamsi();
+        }
     }
 
     public function getInputFilter()
@@ -140,6 +141,25 @@ class Post implements InputFilterAwareInterface
                     ],
                 ],
             ]);
+
+//            $inputFilter->add([
+//                'name' => 'user',
+//                'required' => true,
+//                'filters' => [
+//                    ['name' => 'StringTrim'],
+//                    ['name' => 'StripTags'],
+//                ],
+//                'validators' => [
+//                    [
+//                        'name' => 'StringLength',
+//                        'options' => [
+//                            'encoding' => 'UTF-8',
+//                            'min' => 1,
+//                            'max' => 255,
+//                        ],
+//                    ],
+//                ],
+//            ]);
 
             $inputFilter->add([
                 'name' => 'description',

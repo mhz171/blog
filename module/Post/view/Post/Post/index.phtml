@@ -1,5 +1,4 @@
 <?php
-
 $title = 'My posts';
 $this->headTitle($title);
 ?>
@@ -18,7 +17,7 @@ $this->headTitle($title);
         <th>&nbsp;</th>
     </tr>
 
-    <?php foreach ($posts as $post) : ?>
+    <?php foreach ($paginator as $post) : ?>
         <tr>
             <td><?= $this->escapeHtml($post->getTitle()) ?></td>
             <td><?= $this->escapeHtml($post->getDescription()) ?></td>
@@ -36,3 +35,7 @@ $this->headTitle($title);
         </tr>
     <?php endforeach; ?>
 </table>
+
+
+
+<?= $this->partial('partial/paginator', ['paginator' => $posts]); ?>
