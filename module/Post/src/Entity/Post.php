@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Post\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -8,7 +7,6 @@ use Laminas\InputFilter\InputFilter;
 use Laminas\InputFilter\InputFilterAwareInterface;
 use Laminas\InputFilter\InputFilterInterface;
 use Post\Service\TimeService;
-use User\Entity\User;
 
 /**
  * @ORM\Entity
@@ -21,46 +19,37 @@ class Post implements InputFilterAwareInterface
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
-    public $id;
+    private $id;
 
     /**
      * @ORM\Column(type="string")
      */
-    public $title;
+    private $title;
 
     /**
      * @ORM\Column(type="text")
      */
-    public $description;
-
+    private $description;
 
     /**
      * @ORM\Column(type="string")
      */
-    public $image;
+    private $image;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    public $created_at;
+    private $created_at;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
+    /**
+     * @ORM\ManyToOne(targetEntity= "User\Entity\User")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
     private $user;
 
-    public $inputFilter;
+    private $inputFilter;
 
-    // Add getters and setters for each property
-
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    public function setUser($user)
-    {
-        $this->user = $user;
-    }
+    // Getters and Setters...
 
     public function getId()
     {
@@ -87,7 +76,6 @@ class Post implements InputFilterAwareInterface
         $this->description = $description;
     }
 
-
     public function getImage()
     {
         return $this->image;
@@ -105,7 +93,17 @@ class Post implements InputFilterAwareInterface
 
     public function setCreatedAt($createdAt)
     {
-        $this->created_at = $createdAt;
+        $this->created_at = $CreatedAt;
+    }
+
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    public function setUser($user)
+    {
+        $this->user = $user;
     }
 
     public function setInputFilter(InputFilterInterface $inputFilter)
@@ -144,7 +142,6 @@ class Post implements InputFilterAwareInterface
                     ],
                 ],
             ]);
-
 
             $inputFilter->add([
                 'name' => 'description',

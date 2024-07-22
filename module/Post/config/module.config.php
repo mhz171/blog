@@ -6,6 +6,8 @@ use Laminas\Router\Http\Literal;
 use Laminas\ServiceManager\Factory\InvokableFactory;
 use Laminas\Router\Http\Segment;
 use Post\Controller\PostController;
+use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
+use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 
 return [
     'router' => [
@@ -41,5 +43,21 @@ return [
             'post' => __DIR__ . '/../view',
         ],
     ],
+    'doctrine' => [
+        'driver' => [
+            'orm_default' => [
+                'class' => MappingDriverChain::class,
+                'drivers' => [
+                    'Post\Entity' => 'post_entities',
+                ],
+            ],
+            'post_entities' => [
+                'class' => AnnotationDriver::class,
+                'cache' => 'array',
+                'paths' => [
+                    __DIR__ . '/Entity',
+                ],
+            ],
+        ],
+    ],
 ];
-

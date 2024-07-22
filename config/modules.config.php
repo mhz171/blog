@@ -21,5 +21,6 @@ return [
     'DoctrineModule',
     'DoctrineORMModule',
     'Post',
+    'User',
     
 ];
