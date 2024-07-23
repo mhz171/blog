@@ -79,62 +79,34 @@ class PostController extends AbstractActionController
             return $this->redirect()->toRoute('post', ['action' => 'add']);
         }
 
+        $post = $this->serviceManager->getPostById($id);
+
         $form = new PostForm();
+        $form->bind($post);
         $form->get('submit')->setAttribute('value', 'Edit');
 
         $request = $this->getRequest();
-        $data = ArrayUtils::iteratorToArray($request->getPost());
-
         $viewData = ['id' => $id, 'form' => $form];
 
         if (!$request->isPost()) {
             return $viewData;
         }
 
-        try {
-            $post = $this->entityManager->getRepository(Post::class)->find($id);
-        } catch (\Exception $e) {
-            return $this->redirect()->toRoute('post', ['action' => 'index']);
-        }
-
-
         $form->setInputFilter($post->getInputFilter());
+
         $form->setData($request->getPost());
-
-        if (!$form->isValid()) {
-            return $viewData;
-        }
-
         $fileData = $request->getFiles();
-        $image = "";
-
-        if ($form->isValid() && $fileData['image']['error'] == UPLOAD_ERR_OK) {
-            // Handle file upload
-            $data = $form->getData();
-            $file = $fileData['image'];
-
-            // Define the target directory and file name
-            $targetDir = './public/img/';
-            $image = $targetDir . basename($file['name']);
-
-            // Ensure the directory exists
-            if (!file_exists($targetDir)) {
-                mkdir($targetDir, 0777, true);
-            }
-
-            // Move the uploaded file to the target directory
-            if (!move_uploaded_file($file['tmp_name'], $image)) {
-                $form->get('image')->setMessages(['File upload failed.']);
-            }
+        $data = ArrayUtils::iteratorToArray($request->getPost());
+        try {
+            $this->serviceManager->updatePost($post, $data, $fileData);
+            return $this->redirect()->toRoute('post', ['action' => 'index']);
+        } catch (InvalidArgumentException $ex) {
+            $errors = json_decode($ex->getMessage(), true);
+            $form->setMessages($errors);
         }
 
-        if ($image != "") {
-            $post->setImage($image);
-        }
+        return $viewData;
 
-        $this->entityManager->flush();
-
-        return $this->redirect()->toRoute('post', ['action' => 'index']);
     }
 
     public function deleteAction()
@@ -145,27 +117,23 @@ class PostController extends AbstractActionController
         }
 
         $request = $this->getRequest();
-        if ($request->isPost()) {
-            $del = $request->getPost('del', 'No');
+        $post = $this->serviceManager->getPostById($id);
 
-            if ($del == 'Yes') {
-                $id = (int)$request->getPost('id');
-                $post = $this->entityManager->getRepository(Post::class)->find($id);
-
-                $file_path = $post->getImage();
-                if (file_exists($file_path)) {
-                    unlink($file_path);
-                }
-                $this->entityManager->remove($post);
-                $this->entityManager->flush();
-            }
-
-            return $this->redirect()->toRoute('post');
+        if (!$request->isPost()) {
+            return [
+                'id' => $id,
+                'post' => $post,
+            ];
         }
 
-        return [
-            'id' => $id,
-            'post' => $this->entityManager->getRepository(Post::class)->find($id),
-        ];
+        $del = $request->getPost('del', 'No');
+
+        if ($del == 'Yes') {
+            $this->serviceManager->deletePost($post);
+        }
+
+        return $this->redirect()->toRoute('post');
+
+
     }
 }

@@ -105,14 +105,34 @@ class PostService
 
     }
 
-    public function updatePost($data, $id){
-        $this->validatePostData($data);
-
+    public function getPostById($id)
+    {
         try {
-            $post = $this->entityManager->getRepository(Post::class)->find($id);
+            return $this->entityManager->getRepository(Post::class)->find($id);
         } catch (\Exception $e) {
             return $this->redirect()->toRoute('post', ['action' => 'index']);
         }
+    }
+
+    public function updatePost($post, $data, $fileData){
+
+        $this->validatePostData($data);
+
+        $post->setTitle($data["title"]);
+        $post->setDescription($data["description"]);
+
+        $this->entityManager->flush();
+
+        $this->setImage($fileData, $post);
+    }
+    public function deletePost($post)
+    {
+        $file_path = $post->getImage();
+        if (file_exists($file_path)) {
+            unlink($file_path);
+        }
+        $this->entityManager->remove($post);
+        $this->entityManager->flush();
     }
 }
 
