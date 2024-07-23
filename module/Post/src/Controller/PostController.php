@@ -2,122 +2,73 @@
 
 namespace Post\Controller;
 
-use Doctrine\ORM\EntityManager;
+
+use InvalidArgumentException;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\Paginator\Adapter\ArrayAdapter;
+use Laminas\Stdlib\ArrayUtils;
 use Laminas\View\Model\ViewModel;
-use Post\Entity\Post;
-use Post\Form\PostForm;
+use Laminas\Paginator\Paginator;
+
+use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use Doctrine\ORM\EntityManager;
+
 use Post\Service\PostService;
+use Post\Form\PostForm;
+use Post\Entity\Post;
 use User\Entity\User;
 
-
-use DoctrineModule\Paginator\Adapter\Selectable as SelectableAdapter;
-use Laminas\Paginator\Paginator;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 
 
 class PostController extends AbstractActionController
 {
-    private $entityManager;
+    private $serviceManager;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(PostService $serviceManager)
     {
-        $this->entityManager = $entityManager;
+        $this->serviceManager = $serviceManager;
     }
 
     public function indexAction()
     {
         try {
             $page = $this->params()->fromQuery('page', 1);
-            $limit = 2;
-            $page = ($page < 1) ? 1 : $page;
+            $limit = 5;
 
-            $query = $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
-                ->orderBy('p.created_at', 'ASC')
-                ->getQuery();
-
-            $doctrinePaginator = new DoctrinePaginator($query);
-            $paginator = new Paginator(new ArrayAdapter(iterator_to_array($doctrinePaginator)));
-            $paginator->setCurrentPageNumber($page);
-            $paginator->setItemCountPerPage($limit);
+            $paginator = $this->serviceManager->getPaginatedPosts($page, $limit);
 
             return new ViewModel([
                 'paginator' => $paginator,
             ]);
-
-        } catch (\Exception $e) {
-           var_dump($e->getMessage());
+        }catch (\Exception $ex){
+            var_dump($ex->getMessage());
         }
+
     }
 
     public function addAction()
     {
-        try {
+        $request = $this->getRequest();
         $form = new PostForm();
         $form->get('submit')->setValue('Add');
-
-        $request = $this->getRequest();
 
         if (!$request->isPost()) {
             return ['form' => $form];
         }
 
-        $post = new Post();
-        $form->setInputFilter($post->getInputFilter());
-        $form->setData($request->getPost());
-
-        $postService = new PostService($form);
-        $validationResult = $postService->isValid();
-
-
-        if (!$validationResult) {
-            return ['form' => $form];
-        }
-        $post->setTitle($form->get('title')->getValue());
-        $post->setDescription($form->get('description')->getValue());
-//        TODO: setUser
-        $post->setUser($this->entityManager->getRepository(User::class)->find(1));
-        date_default_timezone_set("Asia/Tehran");
-        $post->setCreatedAt(\DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
-
-        $this->entityManager->persist($post);
-        $this->entityManager->flush();
-
-        $image = "";
+        $data = ArrayUtils::iteratorToArray($request->getPost());
         $fileData = $request->getFiles();
 
-        if ($form->isValid() && $fileData['image']['error'] == UPLOAD_ERR_OK) {
-            // Handle file upload
-            $data = $form->getData();
-            $file = $fileData['image'];
-
-            $uploadDir = './public/img/';
-            $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
-            $newFileName = $post->getId() . '.' . $extension;
-            $image = $uploadDir . $newFileName;
-
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
-            }
-
-            if (move_uploaded_file($file['tmp_name'], $image)) {
-                // Update the post with the new image path
-                $post->setImage($image);
-                $this->entityManager->flush(); // Save the updated post
-            } else {
-                // Handle file upload error
-                echo "Error uploading the file.";
-            }
+        try {
+            $this->serviceManager->addPost($data, $fileData);
+            return $this->redirect()->toRoute('post');
+        } catch (InvalidArgumentException $ex) {
+            // Add error message to form
+            $errors = json_decode($ex->getMessage(), true);
+            $form->setMessages($errors);
         }
+        return ['form' => $form];
 
-        return $this->redirect()->toRoute('post');
-        } catch (\Exception $e) {
-            // نمایش خطا در صورت بروز استثناء
-            echo "An error occurred: " . $e->getMessage();
-        }
     }
 
     public function editAction()
@@ -128,23 +79,24 @@ class PostController extends AbstractActionController
             return $this->redirect()->toRoute('post', ['action' => 'add']);
         }
 
-        // Retrieve the post with the specified id
+        $form = new PostForm();
+        $form->get('submit')->setAttribute('value', 'Edit');
+
+        $request = $this->getRequest();
+        $data = ArrayUtils::iteratorToArray($request->getPost());
+
+        $viewData = ['id' => $id, 'form' => $form];
+
+        if (!$request->isPost()) {
+            return $viewData;
+        }
+
         try {
             $post = $this->entityManager->getRepository(Post::class)->find($id);
         } catch (\Exception $e) {
             return $this->redirect()->toRoute('post', ['action' => 'index']);
         }
 
-        $form = new PostForm();
-        $form->bind($post);
-        $form->get('submit')->setAttribute('value', 'Edit');
-
-        $request = $this->getRequest();
-        $viewData = ['id' => $id, 'form' => $form];
-
-        if (!$request->isPost()) {
-            return $viewData;
-        }
 
         $form->setInputFilter($post->getInputFilter());
         $form->setData($request->getPost());

@@ -2,13 +2,18 @@
 
 namespace Post;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Post\Factory\PostControllerFactory;
+use Post\Factory\PostServiceFactory;
 use Post\Factory\PostTableFactory;
 use Post\Factory\PostTableGatewayFactory;
 use Post\Model\PostTable;
 use Post\Model\Post;
 use Laminas\ModuleManager\Feature\ConfigProviderInterface;
 use Post\Controller\PostController;
+use Post\Service\PostService;
+use Post\Service\TimeService;
+use Psr\Container\ContainerInterface;
 
 
 class Module implements ConfigProviderInterface
@@ -34,8 +39,8 @@ class Module implements ConfigProviderInterface
             'factories' => [
                 PostTable::class => PostTableFactory::class,
                 Model\PostTableGateway::class => PostTableGatewayFactory::class,
-                Post\Service\PostService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
-                Post\Service\TimeService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
+                PostService::class => PostServiceFactory::class,
+                TimeService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
             ],
         ];
     }

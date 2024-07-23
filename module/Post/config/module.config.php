@@ -3,7 +3,6 @@
 namespace Post;
 
 use Laminas\Router\Http\Literal;
-use Laminas\ServiceManager\Factory\InvokableFactory;
 use Laminas\Router\Http\Segment;
 use Post\Controller\PostController;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
