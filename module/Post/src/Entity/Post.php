@@ -19,27 +19,27 @@ class Post implements InputFilterAwareInterface
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(name="id", type="integer")
      */
-    public $id;
+    private $id;
 
     /**
      * @ORM\Column(name="title", type="string")
      */
-    public $title;
+    private $title;
 
     /**
      * @ORM\Column(name="description", type="text")
      */
-    public $description;
+    private $description;
 
     /**
      * @ORM\Column(name="image", type="string")
      */
-    public $image;
+    private $image;
 
     /**
      * @ORM\Column(name="created_at", type="datetime")
      */
-    public $created_at;
+    private $created_at;
 
     // Add getters and setters for each property
     public function getCreatedAt()

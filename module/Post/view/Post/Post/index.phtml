@@ -19,47 +19,24 @@ $this->headTitle($title);
 
 
     <?php foreach ($this->paginator as $post) : ?>
-<!--        --><?php //$post->setTitle('title') ?>
         <tr>
             <td>
-                <?php
-                try {
-                    echo $this->escapeHtml($post->title);
-                } catch (\Exception $e) {
-                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
-                }
-                ?>
+                    <?= $this->escapeHtml($post->getTitle());?>
             </td>
             <td>
-                <?php
-                try {
-                    echo $this->escapeHtml($post->getDescription());
-                } catch (\Exception $e) {
-                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
-                }
-                ?>
+
+                <?=$this->escapeHtml($post->getDescription()); ?>
+            </td>
+
+            <td>
+                <?=$this->escapeHtml($post->getFormattedCreatedAt());?>
             </td>
             <td>
-                <?php
-                try {
-                    echo $this->escapeHtml($post->user->username);
-                } catch (\Exception $e) {
-                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
-                }
-                ?>
+                <?= $this->escapeHtml($post->user->username);?>
             </td>
             <td>
-                <?php
-                try {
-                    echo $this->escapeHtml($post->getFormattedCreatedAt());
-                } catch (\Exception $e) {
-                    echo 'Error occurred: ' . $this->escapeHtml($e->getMessage());
-                }
-                ?>
-            </td>
-            <td>
-                <?php if (!empty($post->image)) : ?>
-                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->image, 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->title) ?>" width="100">
+                <?php if (!empty($post->getImage())) : ?>
+                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->getImage(), 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->getTitle()) ?>" width="100">
                 <?php endif; ?>
             </td>
             <td>
@@ -73,5 +50,5 @@ $this->headTitle($title);
 
 
 
-<?= $this->partial('partial/paginator', ['paginator' => $this->posts]); ?>
+<?= $this->partial('partial/paginator', ['paginator' => $this->paginator]); ?>
 
