@@ -29,7 +29,7 @@ $this->headTitle($title);
             </td>
 
             <td>
-                <?=$this->escapeHtml($post->getFormattedCreatedAt());?>
+                <?=$this->escapeHtml($post->getCreatedAt());?>
             </td>
             <td>
                 <?= $this->escapeHtml($post->user->username);?>

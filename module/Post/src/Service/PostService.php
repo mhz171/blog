@@ -12,7 +12,6 @@ use Post\Entity\Post;
 use Post\Form\PostForm;
 use User\Entity\User;
 
-
 class PostService
 {
     private $entityManager;

@@ -3,8 +3,13 @@ namespace User;
 
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
+use Laminas\Router\Http\Literal;
+use Laminas\Router\Http\Segment;
+use Post\Controller\PostController;
 
 return [
+
+
     'doctrine' => [
         'driver' => [
             'orm_default' => [

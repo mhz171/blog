@@ -2,6 +2,9 @@
 
 namespace Post\Service;
 
+
+use function jdate;
+
 class TimeService
 {
     private $time;
@@ -60,14 +63,16 @@ class TimeService
 
     public function dateToShamsi()
     {
-        date_default_timezone_set("Asia/Tehran");
+        include_once __DIR__ . '/../../../../vendor/jdf/jdf.php';
 
-        list($g_y, $g_m, $g_d) = explode('-', date('Y-m-d', strtotime($this->time)));
-        list($hour, $minute, $second) = explode(':', date('H:i:s', strtotime($this->time)));
+        $timestamp = strtotime($this->time);
 
-        list($j_y, $j_m, $j_d) = $this->gregorianToJalali($g_y, $g_m, $g_d);
+        $shamsiDate = jdate('Y-m-d H:i:s', $timestamp);
 
-        return sprintf('%04d-%02d-%02d %02d:%02d:%02d', $j_y, $j_m, $j_d, $hour, $minute, $second);
+        return $shamsiDate;
+
     }
+
+
 
 }

@@ -42,15 +42,7 @@ class Post implements InputFilterAwareInterface
     private $created_at;
 
     // Add getters and setters for each property
-    public function getCreatedAt()
-    {
-        return $this->created_at;
-    }
 
-    public function setCreatedAt($createdAt)
-    {
-        $this->created_at = $createdAt;
-    }
     /**
      * @ORM\ManyToOne(targetEntity= "User\Entity\User")
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
@@ -60,6 +52,18 @@ class Post implements InputFilterAwareInterface
     private $inputFilter;
 
     // Getters and Setters...
+
+    public function getCreatedAt()
+    {
+        $timeService = new TimeService($this->created_at->format('Y-m-d H:i:s'));
+
+        return $timeService->dateToShamsi();
+    }
+
+    public function setCreatedAt($createdAt)
+    {
+        $this->created_at = $createdAt;
+    }
 
     public function getId()
     {
@@ -96,16 +100,6 @@ class Post implements InputFilterAwareInterface
         $this->image = $image;
     }
 
-//    public function getCreatedAt()
-//    {
-//        return $this->created_at;
-//    }
-//
-//    public function setCreatedAt($createdAt)
-//    {
-//        $this->created_at = $CreatedAt;
-//    }
-
     public function getUser()
     {
         return $this->user;
@@ -121,13 +115,6 @@ class Post implements InputFilterAwareInterface
         throw new \Exception("Not used");
     }
 
-    public function getFormattedCreatedAt()
-    {
-        if ($this->getCreatedAt() != null) {
-            $timeService = new TimeService($this->created_at->format('Y-m-d H:i:s'));
-            return $timeService->dateToShamsi();
-        }
-    }
 
     public function getInputFilter()
     {
