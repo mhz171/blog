@@ -11,16 +11,7 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 return [
     'router' => [
         'routes' => [
-            'home' => [
-                'type'    => Literal::class,
-                'options' => [
-                    'route'    => '/',
-                    'defaults' => [
-                        'controller' => PostController::class,
-                        'action'     => 'index',
-                    ],
-                ],
-            ],
+
             'post' => [
                 'type' => Segment::class,
                 'options' => [

@@ -6,6 +6,7 @@ namespace Post\Controller;
 use InvalidArgumentException;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\Paginator\Adapter\ArrayAdapter;
+use Laminas\Session\Container;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\View\Model\ViewModel;
 use Laminas\Paginator\Paginator;
@@ -31,6 +32,9 @@ class PostController extends AbstractActionController
 
     public function indexAction()
     {
+        $session = new Container('user');
+        $user = $session->user;
+
         try {
             $page = $this->params()->fromQuery('page', 1);
             $limit = 5;
@@ -39,6 +43,7 @@ class PostController extends AbstractActionController
 
             return new ViewModel([
                 'paginator' => $paginator,
+                'user' => $user
             ]);
         }catch (\Exception $ex){
             var_dump($ex->getMessage());
@@ -48,6 +53,7 @@ class PostController extends AbstractActionController
 
     public function addAction()
     {
+
         $request = $this->getRequest();
         $form = new PostForm();
         $form->get('submit')->setValue('Add');
@@ -65,9 +71,13 @@ class PostController extends AbstractActionController
         } catch (InvalidArgumentException $ex) {
             // Add error message to form
             $errors = json_decode($ex->getMessage(), true);
+            var_dump($errors);
             $form->setMessages($errors);
         }
-        return ['form' => $form];
+
+        return [
+            'form' => $form,
+        ];
 
     }
 
