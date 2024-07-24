@@ -24,16 +24,19 @@ use User\Entity\User;
 class PostController extends AbstractActionController
 {
     private $serviceManager;
+    private $user;
 
     public function __construct(PostService $serviceManager)
     {
         $this->serviceManager = $serviceManager;
+        $session = new Container('user');
+        $user = $session->user;
+        $this->user = $user;
     }
 
     public function indexAction()
     {
-        $session = new Container('user');
-        $user = $session->user;
+
 
         try {
             $page = $this->params()->fromQuery('page', 1);
@@ -43,7 +46,7 @@ class PostController extends AbstractActionController
 
             return new ViewModel([
                 'paginator' => $paginator,
-                'user' => $user
+                'user' => $this->user
             ]);
         }catch (\Exception $ex){
             var_dump($ex->getMessage());
@@ -66,7 +69,7 @@ class PostController extends AbstractActionController
         $fileData = $request->getFiles();
 
         try {
-            $this->serviceManager->addPost($data, $fileData);
+            $this->serviceManager->addPost($data, $fileData, $this->user);
             return $this->redirect()->toRoute('post');
         } catch (InvalidArgumentException $ex) {
             // Add error message to form

@@ -86,13 +86,13 @@ class PostService
         }
     }
 
-    public function addPost($data, $fileData)
+    public function addPost($data, $fileData,$user)
     {
         $this->validatePostData($data);
         $post = new Post();
         $post->setTitle($data["title"]);
         $post->setDescription($data["description"]);
-        $post->setUser($this->entityManager->getRepository(User::class)->find(1));
+        $post->setUser($this->entityManager->getRepository(User::class)->find($user->getId()));
         date_default_timezone_set("Asia/Tehran");
         $post->setCreatedAt(\DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
 
