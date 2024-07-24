@@ -43,4 +43,6 @@ class AuthAdapter implements AdapterInterface
 
         return new Result(Result::SUCCESS, $user, ['Authenticated successfully.']);
     }
+
+
 }

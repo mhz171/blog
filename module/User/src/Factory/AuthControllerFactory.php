@@ -14,10 +14,10 @@ class AuthControllerFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $authAdapter = $container->get(DoctrineAdapter::class);
-        $authService = $container->get(AuthenticationService::class);
-        $authService->setAdapter($authAdapter);
 
-        return new AuthController($authService, $authAdapter);
+
+
+        return new AuthController($authAdapter);
     }
 }
 

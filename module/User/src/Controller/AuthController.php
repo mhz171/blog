@@ -17,12 +17,12 @@ use Laminas\Session\Container;
 
 class AuthController extends AbstractActionController
 {
-    private $authService;
+
     private $authAdapter;
 
-    public function __construct(AuthenticationService $authService, DoctrineAdapter $authAdapter)
+    public function __construct( DoctrineAdapter $authAdapter)
     {
-        $this->authService = $authService;
+
         $this->authAdapter = $authAdapter;
     }
 
@@ -37,27 +37,16 @@ class AuthController extends AbstractActionController
             if ($form->isValid()) {
                 $data = $form->getData();
 
-                $this->authAdapter->setUsername($data['username']);
-                $this->authAdapter->setPassword($data['password']);
+                $loginInfo = $this->authAdapter->loginManager($data, $this->authAdapter);
 
-                try {
-                    $result = $this->authService->authenticate();
 
-                }catch (InvalidArgumentException $e) {
-
-                    var_dump($e->getMessage());
-                }
-                if ($result->isValid()) {
-                    $user = $result->getIdentity();
-
-                    // Store user in session
-                    $session = new Container('user');
-                    $session->user = $user;
-
-//                     Store user in session or perform other actions
+                if ($loginInfo['result']->isValid()) {
                     return $this->redirect()->toRoute('post');
-                } else {
-                    $form->setMessages(['password' => $result->getMessages()]);
+                }else{
+                    $form->setMessages(['password' => $loginInfo['result']->getMessages()]);
+                    return new ViewModel([
+                        'form' => $form,
+                    ]);
                 }
             }
         }
