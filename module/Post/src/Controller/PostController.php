@@ -26,13 +26,14 @@ class PostController extends AbstractActionController
 {
     private $serviceManager;
     private $user;
+    private $auth;
 
     public function __construct(PostService $serviceManager)
     {
         $this->serviceManager = $serviceManager;
 
-        $auth = $this->plugin(AuthPlugin::class);
-        $this->user = $auth->getUser();
+        $this->auth = $this->plugin(AuthPlugin::class);
+        $this->user = $this->auth->getUser();
     }
 
 
@@ -45,10 +46,13 @@ class PostController extends AbstractActionController
             $limit = 5;
 
             $paginator = $this->serviceManager->getPaginatedPosts($page, $limit);
+            $flag = $this->auth->isLoggedIn();
 
             return new ViewModel([
                 'paginator' => $paginator,
-                'user' => $this->user
+                'user' => $this->user,
+                'flag' => $flag,
+
             ]);
         }catch (\Exception $ex){
             var_dump($ex->getMessage());

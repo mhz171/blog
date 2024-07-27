@@ -1,4 +1,4 @@
-<?php if ($this->user): ?>
+<?php if ($this->flag): ?>
     <h3><?php echo $this->user->getUsername(); ?> logined!</h3>
 <?php else: ?>
     <p>No user logged in.</p>
@@ -8,9 +8,11 @@ $title = 'My posts';
 $this->headTitle($title);
 ?>
 <h1><?= $this->escapeHtml($title) ?></h1>
-<p>
-    <a href="<?= $this->url('post', ['action' => 'add']) ?>">Add new post</a>
-</p>
+<?php if ($this->flag): ?>
+    <p>
+        <a href="<?= $this->url('post', ['action' => 'add']) ?>">Add new post</a>
+    </p>
+<?php endif; ?>
 
 <table class="table">
     <tr>
@@ -26,7 +28,7 @@ $this->headTitle($title);
     <?php foreach ($this->paginator as $post) : ?>
         <tr>
             <td>
-                    <?= $this->escapeHtml($post->getTitle());?>
+                <?= $this->escapeHtml($post->getTitle());?>
             </td>
             <td>
 
@@ -36,22 +38,22 @@ $this->headTitle($title);
             <td>
                 <?=$this->escapeHtml($post->getCreatedAt());?>
             </td>
-<!--            <td>-->
-<!--                --><?php //= $this->escapeHtml($post->user->getUsername());?>
-<!--            </td>-->
+            <td>
+                <?= $this->escapeHtml($post->user->getUsername());?>
+            </td>
             <td>
                 <?php if (!empty($post->getImage())) : ?>
                     <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->getImage(), 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->getTitle()) ?>" width="100">
                 <?php endif; ?>
-<!--            </td>-->
-<!--            --><?php //if ($this->user->getId() == $post->user->getId()) : ?>
+            </td>
+            <?php if ($this->flag && $this->user->getId() == $post->user->getId()) : ?>
             <td>
                 <a href="<?= $this->url('post', ['action' => 'edit', 'id' => $post->getId()]) ?>">Edit</a>
                 <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post->getId()]) ?>">Delete</a>
             </td>
-<!--            --><?php //else : ?>
+            <?php else : ?>
             <td>Can't Change </td>
-<!--            --><?php //endif; ?>
+            <?php endif; ?>
         </tr>
     <?php endforeach; ?>
 
