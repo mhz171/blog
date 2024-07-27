@@ -36,6 +36,7 @@ class PostController extends AbstractActionController
 
     public function indexAction()
     {
+//        $auth = $this->plugin('auth');
 
 
         try {

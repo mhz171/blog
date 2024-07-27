@@ -87,14 +87,12 @@ class DoctrineAdapter implements AdapterInterface
             $user->setPassword($data['password']);
             $user->setFirstname("asdfasdf");
             $user->setLastname("asdfasdf");
-//            $user->setCreatedAt(new \DateTime());
+            date_default_timezone_set("Asia/Tehran");
+            $user->setCreatedAt(new \DateTime());
 
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            // Store user in session
-            $session = new Container('user');
-            $session->user = $user;
             return $this->loginManager($data, $authAdapter) ;
         }
     }

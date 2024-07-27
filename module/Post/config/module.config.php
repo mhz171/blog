@@ -7,6 +7,7 @@ use Laminas\Router\Http\Segment;
 use Post\Controller\PostController;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
+use User\Service\DoctrineAdapter;
 
 return [
     'router' => [
@@ -48,6 +49,11 @@ return [
                     __DIR__ . '/Entity',
                 ],
             ],
+        ],
+    ],
+    'authentication' => [
+        'adapters' => [
+            'DoctrineAdapter' => DoctrineAdapter::class,
         ],
     ],
 ];

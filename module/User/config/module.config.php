@@ -53,7 +53,6 @@ return [
     ],
     'service_manager' => [
         'factories' => [
-//            AuthAdapter::class => AuthAdapterFactory::class,
             AuthenticationService::class => InvokableFactory::class,
             DoctrineAdapter::class => DoctrineAdapterFactory::class,
         ],

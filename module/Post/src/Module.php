@@ -3,6 +3,8 @@
 namespace Post;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Post\Controller\Plugin\AuthPlugin;
+use Post\Factory\AuthPluginFactory;
 use Post\Factory\PostControllerFactory;
 use Post\Factory\PostServiceFactory;
 use Post\Factory\PostTableFactory;
@@ -27,6 +29,7 @@ class Module implements ConfigProviderInterface
     {
         return [
             'factories' => [
+                AuthPlugin::class => AuthPluginFactory::class,
                 PostController::class => PostControllerFactory::class,
             ]
         ];
@@ -41,6 +44,7 @@ class Module implements ConfigProviderInterface
                 Model\PostTableGateway::class => PostTableGatewayFactory::class,
                 PostService::class => PostServiceFactory::class,
                 TimeService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
+                AuthPlugin::class => AuthPluginFactory::class,
             ],
         ];
     }
