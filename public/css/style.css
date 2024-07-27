@@ -41,3 +41,28 @@
 .pagination-current {
     font-weight: bold;
 }
+
+
+.menu-bar {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    background-color: #333;
+}
+
+.menu-bar li {
+    margin: 0;
+    padding: 10px;
+}
+
+.menu-bar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+}
+
+.menu-bar a:hover {
+    background-color: #575757;
+}

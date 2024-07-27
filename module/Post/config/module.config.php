@@ -2,14 +2,18 @@
 
 namespace Post;
 
+
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
+use Laminas\Authentication\AuthenticationService;
 use Laminas\Db\Sql\Literal;
 use Laminas\Router\Http\Segment;
 use Laminas\ServiceManager\Factory\InvokableFactory;
 use Post\Controller\Plugin\AuthPlugin;
 use Post\Controller\Plugin\AuthPluginFactory;
 use Post\Controller\PostController;
+
+use Post\view\Helper\MenuBar;
 use User\Controller\AuthController;
 use User\Service\DoctrineAdapter;
 
@@ -66,5 +70,17 @@ return [
             AuthPlugin::class => AuthPluginFactory::class,
         ],
 
+    ],
+
+    'view_helpers' => [
+        'factories' => [
+            MenuBar::class => function($container) {
+                $authService = $container->get(AuthenticationService::class);
+                return new MenuBar($authService);
+            },
+        ],
+        'aliases' => [
+            'menuBar' => MenuBar::class,
+        ],
     ],
 ];
