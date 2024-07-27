@@ -24,18 +24,25 @@ class PostService
     public function getQuery()
     {
         return $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
+            ->leftJoin('p.user', 'u', 'u.id = p.user_id')
+            ->select('p.title, p.description, u.username, p.created_at, p.image, u.id AS user_id, p.id AS post_id')
             ->orderBy('p.created_at', 'ASC')
             ->getQuery();
-
     }
 
     public function getPaginatedPosts($page, $limit)
     {
+
         $query = $this->getQuery();
+
+
         $doctrinePaginator = new DoctrinePaginator($query);
         $paginator = new Paginator(new ArrayAdapter(iterator_to_array($doctrinePaginator)));
         $paginator->setCurrentPageNumber($page);
         $paginator->setItemCountPerPage($limit);
+
+
+
         return $paginator;
     }
 

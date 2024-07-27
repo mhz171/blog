@@ -26,35 +26,39 @@ $this->headTitle($title);
 
 
     <?php foreach ($this->paginator as $post) : ?>
+<!--        --><?php //var_dump($post); ?>
         <tr>
             <td>
-                <?= $this->escapeHtml($post->getTitle());?>
+                <?= $this->escapeHtml($post['title']);?>
             </td>
             <td>
 
-                <?=$this->escapeHtml($post->getDescription()); ?>
+                <?=$this->escapeHtml($post['description']); ?>
             </td>
 
             <td>
-                <?=$this->escapeHtml($post->getCreatedAt());?>
+
+                <?= $this->escapeHtml($post['created_at']->format('Y-m-d H:i:s')); ?>
+            </td>
+
+
+            <td>
+                <?= $this->escapeHtml($post['username']);?>
             </td>
             <td>
-                <?= $this->escapeHtml($post->user->getUsername());?>
-            </td>
-            <td>
-                <?php if (!empty($post->getImage())) : ?>
-                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->getImage(), 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->getTitle()) ?>" width="100">
+                <?php if (!empty($post['image'])) : ?>
+                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post['image'], 8))) ?>" alt="<?= $this->escapeHtmlAttr($post['title']) ?>" width="100">
                 <?php endif; ?>
             </td>
-            <?php if ($this->flag && $this->user->getId() == $post->user->getId()) : ?>
+            <?php if ($this->flag && $this->user->getId() == $post['user_id']) : ?>
             <td>
-                <a href="<?= $this->url('post', ['action' => 'edit', 'id' => $post->getId()]) ?>">Edit</a>
-                <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post->getId()]) ?>">Delete</a>
+                <a href="<?= $this->url('post', ['action' => 'edit', 'id' => $post['post_id']]) ?>">Edit</a>
+                <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post['post_id']]) ?>">Delete</a>
             </td>
             <?php else : ?>
             <td>Can't Change </td>
             <?php endif; ?>
-        </tr>
+<!--        </tr>-->
     <?php endforeach; ?>
 
 </table>
