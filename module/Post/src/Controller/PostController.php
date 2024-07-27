@@ -14,6 +14,7 @@ use Laminas\Paginator\Paginator;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use Doctrine\ORM\EntityManager;
 
+use Post\Controller\Plugin\AuthPlugin;
 use Post\Service\PostService;
 use Post\Form\PostForm;
 use Post\Entity\Post;
@@ -29,15 +30,15 @@ class PostController extends AbstractActionController
     public function __construct(PostService $serviceManager)
     {
         $this->serviceManager = $serviceManager;
-        $session = new Container('user');
-        $user = $session->user;
-        $this->user = $user;
+
+        $auth = $this->plugin(AuthPlugin::class);
+        $this->user = $auth->getUser();
     }
+
+
 
     public function indexAction()
     {
-//        $auth = $this->plugin('auth');
-
 
         try {
             $page = $this->params()->fromQuery('page', 1);

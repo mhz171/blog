@@ -2,11 +2,15 @@
 
 namespace Post;
 
-use Laminas\Router\Http\Literal;
-use Laminas\Router\Http\Segment;
-use Post\Controller\PostController;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
+use Laminas\Db\Sql\Literal;
+use Laminas\Router\Http\Segment;
+use Laminas\ServiceManager\Factory\InvokableFactory;
+use Post\Controller\Plugin\AuthPlugin;
+use Post\Controller\Plugin\AuthPluginFactory;
+use Post\Controller\PostController;
+use User\Controller\AuthController;
 use User\Service\DoctrineAdapter;
 
 return [
@@ -27,6 +31,7 @@ return [
                     ],
                 ],
             ],
+
         ],
     ],
     'view_manager' => [
@@ -55,5 +60,11 @@ return [
         'adapters' => [
             'DoctrineAdapter' => DoctrineAdapter::class,
         ],
+    ],
+    'controller_plugins' => [
+        'factories' => [
+            AuthPlugin::class => AuthPluginFactory::class,
+        ],
+
     ],
 ];

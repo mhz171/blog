@@ -36,22 +36,22 @@ $this->headTitle($title);
             <td>
                 <?=$this->escapeHtml($post->getCreatedAt());?>
             </td>
-            <td>
-                <?= $this->escapeHtml($post->user->getUsername());?>
-            </td>
+<!--            <td>-->
+<!--                --><?php //= $this->escapeHtml($post->user->getUsername());?>
+<!--            </td>-->
             <td>
                 <?php if (!empty($post->getImage())) : ?>
                     <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post->getImage(), 8))) ?>" alt="<?= $this->escapeHtmlAttr($post->getTitle()) ?>" width="100">
                 <?php endif; ?>
-            </td>
-            <?php if ($this->user->getId() == $post->user->getId()) : ?>
+<!--            </td>-->
+<!--            --><?php //if ($this->user->getId() == $post->user->getId()) : ?>
             <td>
                 <a href="<?= $this->url('post', ['action' => 'edit', 'id' => $post->getId()]) ?>">Edit</a>
                 <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post->getId()]) ?>">Delete</a>
             </td>
-            <?php else : ?>
+<!--            --><?php //else : ?>
             <td>Can't Change </td>
-            <?php endif; ?>
+<!--            --><?php //endif; ?>
         </tr>
     <?php endforeach; ?>
 
