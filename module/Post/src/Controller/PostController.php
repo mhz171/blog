@@ -27,6 +27,7 @@ class PostController extends AbstractActionController
     private $serviceManager;
     private $user;
     private $auth;
+    private $isLoggedIn;
 
     public function __construct(PostService $serviceManager)
     {
@@ -34,8 +35,8 @@ class PostController extends AbstractActionController
 
         $this->auth = $this->plugin(AuthPlugin::class);
         $this->user = $this->auth->getUser();
+        $this->isLoggedIn = $this->auth->isLoggedIn();
     }
-
 
 
     public function indexAction()
@@ -45,13 +46,15 @@ class PostController extends AbstractActionController
             $page = $this->params()->fromQuery('page', 1);
             $limit = 5;
 
-            $paginator = $this->serviceManager->getPaginatedPosts($page, $limit);
-            $flag = $this->auth->isLoggedIn();
+            $settingPaginator = $this->serviceManager->getPaginatedPosts($page, $limit);
+
 
             return new ViewModel([
-                'paginator' => $paginator,
                 'user' => $this->user,
-                'flag' => $flag,
+                'isLoggedIn' => $this->isLoggedIn,
+                'posts' => $settingPaginator['posts'],
+                'currentPage' => $page,
+                'totalPages' => $settingPaginator['totalPages'],
 
             ]);
         }catch (\Exception $ex){
@@ -62,7 +65,6 @@ class PostController extends AbstractActionController
 
     public function addAction()
     {
-
         $request = $this->getRequest();
         $form = new PostForm();
         $form->get('submit')->setValue('Add');
@@ -78,16 +80,15 @@ class PostController extends AbstractActionController
             $this->serviceManager->addPost($data, $fileData, $this->user);
             return $this->redirect()->toRoute('post');
         } catch (InvalidArgumentException $ex) {
-            // Add error message to form
             $errors = json_decode($ex->getMessage(), true);
             var_dump($errors);
             $form->setMessages($errors);
         }
 
         return [
+            'isLoggedIn' => $this->isLoggedIn,
             'form' => $form,
         ];
-
     }
 
     public function editAction()
@@ -99,13 +100,18 @@ class PostController extends AbstractActionController
         }
 
         $post = $this->serviceManager->getPostById($id);
-
         $form = new PostForm();
         $form->bind($post);
         $form->get('submit')->setAttribute('value', 'Edit');
 
         $request = $this->getRequest();
-        $viewData = ['id' => $id, 'form' => $form];
+        $viewData = [
+            'postUserId' => $post->user->getId(),
+            'userId' => $this->user ? $this->user->getId() : null,
+            'postId' => $id,
+            'form' => $form,
+            'isLoggedIn' => $this->isLoggedIn,
+            ];
 
         if (!$request->isPost()) {
             return $viewData;
@@ -140,7 +146,10 @@ class PostController extends AbstractActionController
 
         if (!$request->isPost()) {
             return [
-                'id' => $id,
+                'postUserId' => $post->user->getId(),
+                'userId' => $this->user ? $this->user->getId() : null,
+                'postId' => $id,
+                'isLoggedIn' => $this->isLoggedIn,
                 'post' => $post,
             ];
         }

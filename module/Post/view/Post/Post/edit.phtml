@@ -1,9 +1,11 @@
-<?php
 
+
+<?php
 $title = 'Edit post';
 $this->headTitle($title);
 ?>
 <h1><?= $this->escapeHtml($title) ?></h1>
+<?php if ($this->isLoggedIn && $this->userId == $this->postUserId): ?>
 <?php
 // Assuming $post is the post data retrieved from the database
 // and $postImagePath contains the path to the current image
@@ -37,7 +39,7 @@ if ($submit) {
 
 $this->form->setAttribute('action', $this->url('post', [
     'action' => 'edit',
-    'id'     => $this->id,
+    'id'     => $this->postId,
 ]));
 $this->form->setAttribute('enctype', 'multipart/form-data'); // Important for file uploads
 $this->form->prepare();
@@ -77,3 +79,6 @@ echo $submit ? $this->formSubmit($submit) : '';
 echo $this->formHidden($this->form->get('id'));
 echo $this->form()->closeTag();
 ?>
+<?php else:?>
+    <h1>You can't edit Post</h1>
+<?php endif; ?>

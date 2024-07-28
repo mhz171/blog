@@ -55,9 +55,8 @@ class Post implements InputFilterAwareInterface
 
     public function getCreatedAt()
     {
-        $timeService = new TimeService($this->created_at->format('Y-m-d H:i:s'));
 
-        return $timeService->dateToShamsi();
+        return $this->created_at;
     }
 
     public function setCreatedAt($createdAt)

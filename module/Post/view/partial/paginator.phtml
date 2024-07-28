@@ -1,21 +1,21 @@
-<!-- view/post/partial/paginator.phtml -->
+
 <?php if (isset($paginator) && $paginator->count() > 1) : ?>
     <div class="pagination-container">
         <div class="pagination">
-            <?php if ($paginator->getPages()->current > 1) : ?>
-                <a href="<?= $this->url(null, [], ['query' => ['page' => $paginator->getPages()->current - 1]]) ?>" class="pagination-link">Previous</a>
+            <?php if ($this->paginator->getPages()->current > 1) : ?>
+                <a href="<?= $this->url(null, [], ['query' => ['page' => $this->paginator->getPages()->current - 1]]) ?>" class="pagination-link">Previous</a>
             <?php endif; ?>
 
-            <?php foreach ($paginator->getPages()->pagesInRange as $page) : ?>
-                <?php if ($page == $paginator->getPages()->current) : ?>
+            <?php foreach ($this->paginator->getPages()->pagesInRange as $page) : ?>
+                <?php if ($page == $this->paginator->getPages()->current) : ?>
                     <span class="pagination-current"><?= $page ?></span>
                 <?php else : ?>
                     <a href="<?= $this->url(null, [], ['query' => ['page' => $page]]) ?>" class="pagination-link"><?= $page ?></a>
                 <?php endif; ?>
             <?php endforeach; ?>
 
-            <?php if ($paginator->getPages()->current < $paginator->getPages()->last) : ?>
-                <a href="<?= $this->url(null, [], ['query' => ['page' => $paginator->getPages()->current + 1]]) ?>" class="pagination-link">Next</a>
+            <?php if ($this->paginator->getPages()->current < $this->paginator->getPages()->last) : ?>
+                <a href="<?= $this->url(null, [], ['query' => ['page' => $this->paginator->getPages()->current + 1]]) ?>" class="pagination-link">Next</a>
             <?php endif; ?>
         </div>
     </div>

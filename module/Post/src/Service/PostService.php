@@ -33,17 +33,29 @@ class PostService
     public function getPaginatedPosts($page, $limit)
     {
 
+        $offset = ($page - 1) * $limit;
+
         $query = $this->getQuery();
 
+        $posts = $query->getResult();
+        $totalItems = count($posts);;
 
-        $doctrinePaginator = new DoctrinePaginator($query);
-        $paginator = new Paginator(new ArrayAdapter(iterator_to_array($doctrinePaginator)));
-        $paginator->setCurrentPageNumber($page);
-        $paginator->setItemCountPerPage($limit);
+        foreach ($posts as &$post) {
+            $createdAt = $post['created_at'];
+            $timeService  = new TimeService($createdAt);
+            $post['created_at'] = $timeService->dateToShamsi();
+
+        }
+        $posts = array_slice($posts, $offset, $limit);
+        $totalPages = ceil($totalItems / $limit);
+
+        return [
+            'posts' => $posts,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+        ];
 
 
-
-        return $paginator;
     }
 
     public function setImage($fileData, $post)

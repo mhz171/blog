@@ -1,12 +1,13 @@
 <?php
 
 $title = 'Delete post';
-$url   = $this->url('post', ['action' => 'delete', 'id' => $this->id]);
+$url   = $this->url('post', ['action' => 'delete', 'id' => $this->postId]);
 
 $this->headTitle($title);
 ?>
 <h1><?= $this->escapeHtml($title) ?></h1>
 
+<?php if ($this->isLoggedIn && $this->userId == $this->postUserId): ?>
 <p>
     Are you sure that you want to delete
     "<?= $this->escapeHtml($this->post->getTitle()) ?>" by
@@ -20,3 +21,7 @@ $this->headTitle($title);
         <input type="submit" class="btn btn-success" name="del" value="No" />
     </div>
 </form>
+
+<?php else:?>
+    <h1>You can't edit Post</h1>
+<?php endif; ?>

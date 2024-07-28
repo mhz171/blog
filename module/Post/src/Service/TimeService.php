@@ -9,7 +9,7 @@ class TimeService
 {
     private $time;
 
-    public function __construct(string $time)
+    public function __construct(\DateTime $time)
     {
         $this->time = $time;
     }
@@ -18,12 +18,21 @@ class TimeService
     {
         include_once __DIR__ . '/../../../../vendor/jdf/jdf.php';
 
-        $timestamp = strtotime($this->time);
+        $timestamp = $this->time->getTimestamp();
 
         $shamsiDate = jdate('Y-m-d H:i:s', $timestamp);
 
         return $shamsiDate;
 
+    }
+
+    public function dateToMiladi()
+    {
+        include_once __DIR__ . '/../../../../vendor/jdf/jdf.php';
+
+        $timestamp = jdate('Y-m-d H:i:s', strtotime($this->time));
+
+        return $timestamp;
     }
 
 

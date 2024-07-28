@@ -17,30 +17,13 @@
 }
 
 
-.pagination-container {
-    text-align: center;
-    margin-top: 20px;
-}
 
 .pagination {
-    display: inline-block;
+    display: flex;
+    justify-content: center;
 }
 
-.pagination-link,
-.pagination-current {
-    margin: 0 5px;
-    padding: 8px 16px;
-    text-decoration: none;
-    color: #000;
-}
 
-.pagination-link:hover {
-    background-color: #ddd;
-}
-
-.pagination-current {
-    font-weight: bold;
-}
 
 
 .menu-bar {
