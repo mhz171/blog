@@ -25,14 +25,14 @@ use User\Entity\User;
 
 class PostController extends AbstractActionController
 {
-    private $serviceManager;
+    private $postService;
     private $user;
     private $auth;
     private $isLoggedIn;
 
-    public function __construct(PostService $serviceManager)
+    public function __construct(PostService $postService)
     {
-        $this->serviceManager = $serviceManager;
+        $this->postService = $postService;
 
         $this->auth = $this->plugin(AuthPlugin::class);
         $this->user = $this->auth->getUser();
@@ -47,7 +47,7 @@ class PostController extends AbstractActionController
             $page = $this->params()->fromQuery('page', 1);
             $limit = 5;
 
-            $settingPaginator = $this->serviceManager->getPaginatedPosts($page, $limit);
+            $settingPaginator = $this->postService->getPaginatedPosts($page, $limit);
 
 
             return new ViewModel([
@@ -79,7 +79,7 @@ class PostController extends AbstractActionController
         $fileData = $request->getFiles();
 
         try {
-            $this->serviceManager->addPost($data, $fileData, $this->user);
+            $this->postService->addPost($data, $fileData, $this->user);
             return $this->redirect()->toRoute('post');
         } catch (InvalidArgumentException $ex) {
             $errors = json_decode($ex->getMessage(), true);
@@ -101,7 +101,7 @@ class PostController extends AbstractActionController
             return $this->redirect()->toRoute('post', ['action' => 'add']);
         }
 
-        $post = $this->serviceManager->getPostById($id);
+        $post = $this->postService->getPostById($id);
         $form = new PostForm();
         $form->bind($post);
         $form->get('submit')->setAttribute('value', 'Edit');
@@ -125,7 +125,7 @@ class PostController extends AbstractActionController
         $fileData = $request->getFiles();
         $data = ArrayUtils::iteratorToArray($request->getPost());
         try {
-            $this->serviceManager->updatePost($post, $data, $fileData);
+            $this->postService->updatePost($post, $data, $fileData);
             return $this->redirect()->toRoute('post', ['action' => 'index']);
         } catch (InvalidArgumentException $ex) {
             $errors = json_decode($ex->getMessage(), true);
@@ -144,7 +144,7 @@ class PostController extends AbstractActionController
         }
 
         $request = $this->getRequest();
-        $post = $this->serviceManager->getPostById($id);
+        $post = $this->postService->getPostById($id);
 
         if (!$request->isPost()) {
             return [
@@ -159,7 +159,7 @@ class PostController extends AbstractActionController
         $del = $request->getPost('del', 'No');
 
         if ($del == 'Yes') {
-            $this->serviceManager->deletePost($post);
+            $this->postService->deletePost($post);
         }
 
         return $this->redirect()->toRoute('post');
@@ -173,14 +173,14 @@ class PostController extends AbstractActionController
         if ($request->isPost()) {
             $data = json_decode($request->getContent(), true);
             // اعتبارسنجی داده‌های ورودی
-            if (!$this->serviceManager->validatePostData($data)) {
+            if (!$this->postService->validatePostData($data)) {
                 return new JsonModel([
                     'success' => false,
                     'message' => 'Title, description, and user_id are required.'
                 ]);
             }
 
-            $user = $this->serviceManager->getUser($data['user_id']);
+            $user = $this->postService->getUser($data['user_id']);
             if (!$user) {
                 return new JsonModel([
                     'success' => false,
@@ -188,7 +188,7 @@ class PostController extends AbstractActionController
                 ]);
             }
 //
-            $postId = $this->serviceManager->apiAddPost($data, $user);
+            $postId = $this->postService->apiAddPost($data, $user);
 //
             return new JsonModel([
                 'success' => true,
