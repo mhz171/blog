@@ -35,12 +35,25 @@ return [
                     ],
                 ],
             ],
+            'api-post' => [
+                'type' => 'segment',
+                'options' => [
+                    'route' => '/api/post/create',
+                    'defaults' => [
+                        'controller' => PostController::class,
+                        'action' => 'create',
+                    ],
+                ],
+            ],
 
         ],
     ],
     'view_manager' => [
         'template_path_stack' => [
             'post' => __DIR__ . '/../view',
+        ],
+        'strategies' => [
+            'ViewJsonStrategy',
         ],
     ],
     'doctrine' => [

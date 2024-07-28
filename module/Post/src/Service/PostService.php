@@ -84,7 +84,7 @@ class PostService
             }
         }
     }
-    private function validatePostData($data)
+    public function validatePostData($data)
     {
         $errors = [];
 
@@ -103,6 +103,7 @@ class PostService
         if (!empty($errors)) {
             throw new InvalidArgumentException(json_encode($errors));
         }
+        return 1;
     }
 
     public function addPost($data, $fileData,$user)
@@ -151,6 +152,32 @@ class PostService
         }
         $this->entityManager->remove($post);
         $this->entityManager->flush();
+    }
+
+
+    public function getUser($userId)
+    {
+        return $this->entityManager->getRepository(User::class)->find($userId);
+    }
+
+    public function apiAddPost($data, $user)
+    {
+        $post = new Post();
+        $post->setTitle($data['title']);
+        $post->setDescription($data['description']);
+        $post->setCreatedAt(new \DateTime());
+        $post->setUser($user);
+
+        if (!empty($data['image'])) {
+            $post->setImage($data['image']);
+        }
+
+        // ذخیره پست در دیتابیس
+        $this->entityManager->persist($post);
+        $this->entityManager->flush();
+
+        return $post->getId();
+
     }
 }
 

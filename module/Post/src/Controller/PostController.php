@@ -8,6 +8,7 @@ use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\Paginator\Adapter\ArrayAdapter;
 use Laminas\Session\Container;
 use Laminas\Stdlib\ArrayUtils;
+use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
 use Laminas\Paginator\Paginator;
 
@@ -72,6 +73,7 @@ class PostController extends AbstractActionController
         if (!$request->isPost()) {
             return ['form' => $form];
         }
+
 
         $data = ArrayUtils::iteratorToArray($request->getPost());
         $fileData = $request->getFiles();
@@ -163,5 +165,35 @@ class PostController extends AbstractActionController
         return $this->redirect()->toRoute('post');
 
 
+    }
+
+    public function createAction()
+    {
+        $request = $this->getRequest();
+        if ($request->isPost()) {
+            $data = json_decode($request->getContent(), true);
+            // اعتبارسنجی داده‌های ورودی
+            if (!$this->serviceManager->validatePostData($data)) {
+                return new JsonModel([
+                    'success' => false,
+                    'message' => 'Title, description, and user_id are required.'
+                ]);
+            }
+
+            $user = $this->serviceManager->getUser($data['user_id']);
+            if (!$user) {
+                return new JsonModel([
+                    'success' => false,
+                    'message' => 'User not found.'
+                ]);
+            }
+//
+            $postId = $this->serviceManager->apiAddPost($data, $user);
+//
+            return new JsonModel([
+                'success' => true,
+                'post_id' => $postId,
+            ]);
+        }
     }
 }
