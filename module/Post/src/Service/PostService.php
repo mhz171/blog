@@ -10,35 +10,47 @@ use Laminas\Paginator\Adapter\ArrayAdapter;
 use Laminas\Paginator\Paginator;
 use Post\Entity\Post;
 use Post\Form\PostForm;
+use Post\Repository\PostRepository;
 use User\Entity\User;
 
 class PostService
 {
     private $entityManager;
+    private $postRepository;
+    private $limit;
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManager $entityManager, PostRepository $postRepository)
     {
         $this->entityManager = $entityManager;
+        $this->postRepository = $postRepository;
+        $this->limit = 10;
     }
 
-    public function getQuery()
+    public function getQuery($offset, $limit)
     {
         return $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
             ->leftJoin('p.user', 'u', 'u.id = p.user_id')
             ->select('p.title, p.description, u.username, p.created_at, p.image, u.id AS user_id, p.id AS post_id')
             ->orderBy('p.created_at', 'ASC')
-            ->getQuery();
+            ->getQuery()
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
     }
 
     public function getPaginatedPosts($page, $limit)
     {
+        $this->limit = $limit;
+        $offset = ($page - 1) * $this->limit;
 
-        $offset = ($page - 1) * $limit;
+        $query = $this->getQuery($offset, $this->limit);
 
-        $query = $this->getQuery();
+        $posts = $this->postRepository->getPosts($offset, $this->limit);
 
-        $posts = $query->getResult();
-        $totalItems = count($posts);
+        $totalItemsQuery = $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
+            ->select('COUNT(p.id)')
+            ->getQuery();
+
+        $totalItems = $totalItemsQuery->getSingleScalarResult();
 
         foreach ($posts as &$post) {
             $createdAt = $post['created_at'];
@@ -46,8 +58,8 @@ class PostService
             $post['created_at'] = $timeService->dateToShamsi();
 
         }
-        $posts = array_slice($posts, $offset, $limit);
         $totalPages = ceil($totalItems / $limit);
+
 
         return [
             'posts' => $posts,

@@ -40,28 +40,19 @@ class PostController extends AbstractActionController
     }
 
 
-    public function indexAction()
+    public function indexAction(): ViewModel
     {
+        $limit = $this->params()->fromQuery('limit', 10);
+        $page = $this->params()->fromQuery('page', 1);
 
-        try {
-            $page = $this->params()->fromQuery('page', 1);
-            $limit = 5;
-
-            $settingPaginator = $this->postService->getPaginatedPosts($page, $limit);
-
-
-            return new ViewModel([
-                'user' => $this->user,
-                'isLoggedIn' => $this->isLoggedIn,
-                'posts' => $settingPaginator['posts'],
-                'currentPage' => $page,
-                'totalPages' => $settingPaginator['totalPages'],
-
-            ]);
-        }catch (\Exception $ex){
-            var_dump($ex->getMessage());
-        }
-
+        $settingPaginator = $this->postService->getPaginatedPosts($page, $limit);
+        return new ViewModel([
+            'isLoggedIn' => $this->isLoggedIn,
+            'user' => $this->user,
+            'posts' => $settingPaginator['posts'],
+            'currentPage' => $page,
+            'totalPages' => $settingPaginator['totalPages'],
+        ]);
     }
 
     public function addAction()

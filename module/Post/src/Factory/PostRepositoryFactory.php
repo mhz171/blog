@@ -4,6 +4,7 @@ namespace Post\Factory;
 
 use Doctrine\ORM\EntityManager;
 use Laminas\ServiceManager\Factory\FactoryInterface;
+use Post\Repository\PostRepository;
 
 class PostRepositoryFactory implements FactoryInterface
 {
