@@ -38,7 +38,7 @@ class PostService
         $query = $this->getQuery();
 
         $posts = $query->getResult();
-        $totalItems = count($posts);;
+        $totalItems = count($posts);
 
         foreach ($posts as &$post) {
             $createdAt = $post['created_at'];
@@ -162,6 +162,7 @@ class PostService
 
     public function apiAddPost($data, $user)
     {
+
         $post = new Post();
         $post->setTitle($data['title']);
         $post->setDescription($data['description']);
@@ -172,9 +173,9 @@ class PostService
             $post->setImage($data['image']);
         }
 
-        // ذخیره پست در دیتابیس
         $this->entityManager->persist($post);
         $this->entityManager->flush();
+
 
         return $post->getId();
 

@@ -75,7 +75,6 @@ class DoctrineAdapter implements AdapterInterface
                 $session->user = $user;
 
             }
-//                     Store user in session or perform other actions
             return [
                 'user' => $user,
                 'result' => $result,

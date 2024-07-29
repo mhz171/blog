@@ -10,10 +10,12 @@ use Post\Controller\PluginManager;
 use Post\Controller\PostController;
 use Post\Factory\AuthPluginFactory;
 use Post\Factory\PostControllerFactory;
+use Post\Factory\PostRepositoryFactory;
 use Post\Factory\PostServiceFactory;
 use Post\Factory\PostTableFactory;
 use Post\Factory\PostTableGatewayFactory;
 use Post\Model\PostTable;
+use Post\Repository\PostRepository;
 use Post\Service\PostService;
 use Post\Service\TimeService;
 
@@ -44,6 +46,7 @@ class Module implements ConfigProviderInterface
                 PostService::class => PostServiceFactory::class,
                 TimeService::class => \Laminas\ServiceManager\Factory\InvokableFactory::class,
                 AuthenticationService::class => InvokableFactory::class,
+                PostRepository::class => PostRepositoryFactory::class,
             ],
         ];
     }

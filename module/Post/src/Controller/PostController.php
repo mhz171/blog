@@ -70,7 +70,7 @@ class PostController extends AbstractActionController
         $form = new PostForm();
         $form->get('submit')->setValue('Add');
 
-        if (!$request->isPost()) {
+        if (!$request->isPost() && !$this->isLoggedIn) {
             return ['form' => $form];
         }
 
@@ -83,7 +83,6 @@ class PostController extends AbstractActionController
             return $this->redirect()->toRoute('post');
         } catch (InvalidArgumentException $ex) {
             $errors = json_decode($ex->getMessage(), true);
-            var_dump($errors);
             $form->setMessages($errors);
         }
 
@@ -95,9 +94,9 @@ class PostController extends AbstractActionController
 
     public function editAction()
     {
+        $request = $this->getRequest();
         $id = (int)$this->params()->fromRoute('id', 0);
-
-        if (0 === $id) {
+        if (!$request->isPost() && 0 === $id) {
             return $this->redirect()->toRoute('post', ['action' => 'add']);
         }
 
@@ -106,7 +105,6 @@ class PostController extends AbstractActionController
         $form->bind($post);
         $form->get('submit')->setAttribute('value', 'Edit');
 
-        $request = $this->getRequest();
         $viewData = [
             'postUserId' => $post->user->getId(),
             'userId' => $this->user ? $this->user->getId() : null,
@@ -115,9 +113,6 @@ class PostController extends AbstractActionController
             'isLoggedIn' => $this->isLoggedIn,
             ];
 
-        if (!$request->isPost()) {
-            return $viewData;
-        }
 
         $form->setInputFilter($post->getInputFilter());
 
@@ -172,12 +167,16 @@ class PostController extends AbstractActionController
         $request = $this->getRequest();
         if ($request->isPost()) {
             $data = json_decode($request->getContent(), true);
-            // اعتبارسنجی داده‌های ورودی
-            if (!$this->postService->validatePostData($data)) {
-                return new JsonModel([
-                    'success' => false,
-                    'message' => 'Title, description, and user_id are required.'
-                ]);
+            try {
+                if (!$this->postService->validatePostData($data)) {
+                    return new JsonModel([
+                        'success' => false,
+                        'message' => 'Title, description, and user_id are required.'
+                    ]);
+                }
+            }catch (InvalidArgumentException $ex){
+                $errors = json_decode($ex->getMessage(), true);
+                return new JsonModel($errors);
             }
 
             $user = $this->postService->getUser($data['user_id']);
@@ -188,8 +187,12 @@ class PostController extends AbstractActionController
                 ]);
             }
 //
-            $postId = $this->postService->apiAddPost($data, $user);
+            $res = $this->postService->apiAddPost($data, $user);
 //
+            return new JsonModel($res);
+
+
+
             return new JsonModel([
                 'success' => true,
                 'post_id' => $postId,
