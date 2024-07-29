@@ -40,7 +40,8 @@
         "psr-4": {
             "Application\\": "module/Application/src/",
             "Post\\": "module/Post/src/",
-            "User\\": "module/User/src/"
+            "User\\": "module/User/src/",
+            "Comment\\": "module/Comment/src/"
         }
     },
     "autoload-dev": {

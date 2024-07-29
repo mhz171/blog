@@ -23,5 +23,6 @@ return [
     'DoctrineORMModule',
     'Post',
     'User',
-    'Application'
+    'Application',
+    'Comment'
 ];
