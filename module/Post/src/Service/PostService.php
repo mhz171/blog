@@ -2,12 +2,17 @@
 
 namespace Post\Service;
 
+use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use Exception;
 use InvalidArgumentException;
 use Laminas\Paginator\Adapter\ArrayAdapter;
 use Laminas\Paginator\Paginator;
+use Laminas\View\Model\JsonModel;
 use Post\Entity\Post;
 use Post\Form\PostForm;
 use Post\Repository\PostRepository;
@@ -15,91 +20,153 @@ use User\Entity\User;
 
 class PostService
 {
-    private $entityManager;
-    private $postRepository;
-    private $limit;
+    private PostRepository $postRepository;
+    private int $limit;
 
-    public function __construct(EntityManager $entityManager, PostRepository $postRepository)
+    public function __construct( PostRepository $postRepository)
     {
-        $this->entityManager = $entityManager;
         $this->postRepository = $postRepository;
         $this->limit = 10;
     }
 
-    public function getQuery($offset, $limit)
+    public function preparePosts(&$posts): void
     {
-        return $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
-            ->leftJoin('p.user', 'u', 'u.id = p.user_id')
-            ->select('p.title, p.description, u.username, p.created_at, p.image, u.id AS user_id, p.id AS post_id')
-            ->orderBy('p.created_at', 'ASC')
-            ->getQuery()
-            ->setFirstResult($offset)
-            ->setMaxResults($limit);
-    }
-
-    public function getPaginatedPosts($page, $limit)
-    {
-        $this->limit = $limit;
-        $offset = ($page - 1) * $this->limit;
-
-        $query = $this->getQuery($offset, $this->limit);
-
-        $posts = $this->postRepository->getPosts($offset, $this->limit);
-
-        $totalItemsQuery = $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
-            ->select('COUNT(p.id)')
-            ->getQuery();
-
-        $totalItems = $totalItemsQuery->getSingleScalarResult();
-
         foreach ($posts as &$post) {
             $createdAt = $post['created_at'];
             $timeService  = new TimeService($createdAt);
             $post['created_at'] = $timeService->dateToShamsi();
 
         }
-        $totalPages = ceil($totalItems / $limit);
+    }
 
+    public function calculateTotalPosts(): float
+    {
+        $totalItems = 0;
+        try {
+            $totalItems = $this->postRepository->getPostCount();
+        } catch (NoResultException|NonUniqueResultException $e) {
+            var_dump($e->getMessage());
+        }
+        return ceil($totalItems / $this->limit);
+    }
+
+    public function getPaginatedPosts($page, $limit): array
+    {
+        $this->limit = $limit;
+        $offset = ($page - 1) * $this->limit;
+
+        $posts = $this->postRepository->getPosts($offset, $this->limit);
+
+        $this->preparePosts($posts);
+
+        $totalPages = $this->calculateTotalPosts();
 
         return [
             'posts' => $posts,
             'currentPage' => $page,
             'totalPages' => $totalPages,
         ];
-
-
     }
 
-    public function setImage($fileData, $post)
+//    public function setImage($fileData, $post): void
+//    {
+//        $image = "";
+//        $file = $fileData['image'];
+//        if ($file['error'] == UPLOAD_ERR_OK) {
+//
+//            $uploadDir = './public/img/';
+//            $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
+//            $newFileName = $post->getId() . '.' . $extension;
+//            $image = $uploadDir . $newFileName;
+//
+//            if (!file_exists($uploadDir)) {
+//                mkdir($uploadDir, 0777, true);
+//            }
+//
+//            if (move_uploaded_file($file['tmp_name'], $image)) {
+//                $post->setImage($image);
+//                $this->postRepository->flush();
+//            } else {
+//                var_dump("Error uploading the file.");
+//            }
+//        }
+//    }
+//
+//    public function setImageApi($data, $post): void
+//    {
+//        $post->setImage($data['image']);
+//        $this->postRepository->flush();
+//    }
+
+
+    /**
+     * @throws Exception
+     */
+    public function setImage($fileData, $post): void
     {
         $image = "";
-        if ($fileData['image']['error'] == UPLOAD_ERR_OK) {
-            // Handle file upload
+        // Check if $fileData is an array or a api string
+        if ( isset($fileData['image'])) {
             $file = $fileData['image'];
+            if ($file['error'] == UPLOAD_ERR_OK) {
+                $image = $this->handleImageUpload($file, $post);
 
-            $uploadDir = './public/img/';
-            $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
-            $newFileName = $post->getId() . '.' . $extension;
-            $image = $uploadDir . $newFileName;
-
-            if (!file_exists($uploadDir)) {
-                mkdir($uploadDir, 0777, true);
             }
+        } elseif (is_string($fileData) && $fileData) {
+            $image = $this->handleApiImageUpload($fileData, $post);
+        }
 
-            if (move_uploaded_file($file['tmp_name'], $image)) {
-                // Update the post with the new image path
-                $post->setImage($image);
-                $this->entityManager->flush(); // Save the updated post
-            } else {
-                // Handle file upload error
-                var_dump("Error uploading the file.");
-            }
+        if ($image) {
+            $post->setImage($image);
+            $this->postRepository->flush();
         }
     }
-    public function validatePostData($data)
+
+    private function handleImageUpload($file, $post)
+    {
+        $uploadDir = './public/img/';
+        $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
+        $newFileName = $post->getId() . '.' . $extension;
+        $image = $uploadDir . $newFileName;
+
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        if (move_uploaded_file($file['tmp_name'], $image)) {
+            return $image;
+        } else {
+            throw new Exception("Error uploading the file.");
+        }
+    }
+
+    private function handleApiImageUpload($apiString, $post)
+    {
+        $uploadDir = './public/img/';
+        $extension = pathinfo(basename($apiString), PATHINFO_EXTENSION);
+        $newFileName = $post->getId() . '.' . $extension;
+        $image = $uploadDir . $newFileName;
+
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $data = $apiString;
+        if ($data === false) {
+            throw new Exception("Error decoding the api string.");
+        }
+
+        if (file_put_contents($image, $data) !== false) {
+            return $image;
+        } else {
+            throw new Exception("Error saving the api image.");
+        }
+    }
+
+
+    public function validatePostData($data): int
     {
         $errors = [];
-
         if (empty($data['title'])) {
             $errors['title'][] = "Title is required";
         } elseif (strlen($data['title']) > 255) {
@@ -118,78 +185,80 @@ class PostService
         return 1;
     }
 
-    public function addPost($data, $fileData,$user)
+
+    public function addPost($data, $fileData, $user): void
     {
         $this->validatePostData($data);
+
         $post = new Post();
         $post->setTitle($data["title"]);
         $post->setDescription($data["description"]);
-        $post->setUser($this->entityManager->getRepository(User::class)->find($user->getId()));
-        date_default_timezone_set("Asia/Tehran");
-        $post->setCreatedAt(\DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
 
-        $this->entityManager->persist($post);
-        $this->entityManager->flush();
+        $postUser = $this->postRepository->getUserById($user->getId());
+        $post->setUser($postUser);
+
+        date_default_timezone_set("Asia/Tehran");
+        $post->setCreatedAt(DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
+
+        $this->postRepository->persist($post);
+        $this->postRepository->flush();
 
         $this->setImage($fileData, $post);
-
-
     }
 
     public function getPostById($id)
     {
-        try {
-            return $this->entityManager->getRepository(Post::class)->find($id);
-        } catch (\Exception $e) {
-            return $this->redirect()->toRoute('post', ['action' => 'index']);
-        }
+        return $this->postRepository->getPostById($id);
     }
 
-    public function updatePost($post, $data, $fileData){
-
+    public function updatePost($post, $data, $fileData): void
+    {
         $this->validatePostData($data);
 
         $post->setTitle($data["title"]);
         $post->setDescription($data["description"]);
 
-        $this->entityManager->flush();
-
+        $this->postRepository->flush();
         $this->setImage($fileData, $post);
     }
-    public function deletePost($post)
+    public function deletePost($post): void
     {
         $file_path = $post->getImage();
         if (file_exists($file_path)) {
             unlink($file_path);
         }
-        $this->entityManager->remove($post);
-        $this->entityManager->flush();
+        $this->postRepository->remove($post);
+        $this->postRepository->flush();
     }
 
-
-    public function getUser($userId)
-    {
-        return $this->entityManager->getRepository(User::class)->find($userId);
-    }
-
-    public function apiAddPost($data, $user)
+    public function apiAddPost($data, $file)
     {
 
-        $post = new Post();
-        $post->setTitle($data['title']);
-        $post->setDescription($data['description']);
-        $post->setCreatedAt(new \DateTime());
-        $post->setUser($user);
-
-        if (!empty($data['image'])) {
-            $post->setImage($data['image']);
+        try {
+            if (!$this->validatePostData($data)) {
+                return [
+                    'success' => false,
+                    'message' => 'Title, description, and user_id are required.'
+                ];
+            }
+        }catch (InvalidArgumentException $ex){
+            return json_decode($ex->getMessage(), true);
         }
 
-        $this->entityManager->persist($post);
-        $this->entityManager->flush();
+        $user = $this->postRepository->getUserById($data['user_id']);
 
+        if (!$user) {
+            return [
+                'success' => false,
+                'message' => 'User not found.'
+            ];
+        }
 
-        return $post->getId();
+        $this->addPost($data, $data['image'], $user);
+
+        return [
+            'success' => true,
+        ];
 
     }
 }

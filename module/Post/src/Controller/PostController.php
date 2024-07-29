@@ -4,6 +4,7 @@ namespace Post\Controller;
 
 
 use InvalidArgumentException;
+use Laminas\Http\Response;
 use Laminas\Mvc\Controller\AbstractActionController;
 use Laminas\Paginator\Adapter\ArrayAdapter;
 use Laminas\Session\Container;
@@ -46,6 +47,7 @@ class PostController extends AbstractActionController
         $page = $this->params()->fromQuery('page', 1);
 
         $settingPaginator = $this->postService->getPaginatedPosts($page, $limit);
+
         return new ViewModel([
             'isLoggedIn' => $this->isLoggedIn,
             'user' => $this->user,
@@ -55,16 +57,20 @@ class PostController extends AbstractActionController
         ]);
     }
 
-    public function addAction()
+    public function addAction(): array|Response
     {
+        if (!$this->isLoggedIn){
+            return $this->redirect()->toRoute('login');
+        }
+
         $request = $this->getRequest();
+
         $form = new PostForm();
         $form->get('submit')->setValue('Add');
 
-        if (!$request->isPost() && !$this->isLoggedIn) {
+        if (!$request->isPost()) {
             return ['form' => $form];
         }
-
 
         $data = ArrayUtils::iteratorToArray($request->getPost());
         $fileData = $request->getFiles();
@@ -83,10 +89,15 @@ class PostController extends AbstractActionController
         ];
     }
 
-    public function editAction()
+    public function editAction(): Response|array
     {
+        if (!$this->isLoggedIn){
+            return $this->redirect()->toRoute('login');
+        }
+
         $request = $this->getRequest();
         $id = (int)$this->params()->fromRoute('id', 0);
+
         if (!$request->isPost() && 0 === $id) {
             return $this->redirect()->toRoute('post', ['action' => 'add']);
         }
@@ -96,20 +107,12 @@ class PostController extends AbstractActionController
         $form->bind($post);
         $form->get('submit')->setAttribute('value', 'Edit');
 
-        $viewData = [
-            'postUserId' => $post->user->getId(),
-            'userId' => $this->user ? $this->user->getId() : null,
-            'postId' => $id,
-            'form' => $form,
-            'isLoggedIn' => $this->isLoggedIn,
-            ];
-
-
         $form->setInputFilter($post->getInputFilter());
 
         $form->setData($request->getPost());
         $fileData = $request->getFiles();
         $data = ArrayUtils::iteratorToArray($request->getPost());
+
         try {
             $this->postService->updatePost($post, $data, $fileData);
             return $this->redirect()->toRoute('post', ['action' => 'index']);
@@ -118,12 +121,22 @@ class PostController extends AbstractActionController
             $form->setMessages($errors);
         }
 
-        return $viewData;
+        return [
+            'postUserId' => $post->user->getId(),
+            'userId' => $this->user ? $this->user->getId() : null,
+            'postId' => $id,
+            'form' => $form,
+            'isLoggedIn' => $this->isLoggedIn,
+        ];
 
     }
 
-    public function deleteAction()
+    public function deleteAction(): Response|array
     {
+        if (!$this->isLoggedIn){
+            return $this->redirect()->toRoute('login');
+        }
+
         $id = (int)$this->params()->fromRoute('id', 0);
         if (!$id) {
             return $this->redirect()->toRoute('post');
@@ -153,41 +166,21 @@ class PostController extends AbstractActionController
 
     }
 
-    public function createAction()
+    public function createAction(): JsonModel
     {
         $request = $this->getRequest();
-        if ($request->isPost()) {
-            $data = json_decode($request->getContent(), true);
-            try {
-                if (!$this->postService->validatePostData($data)) {
-                    return new JsonModel([
-                        'success' => false,
-                        'message' => 'Title, description, and user_id are required.'
-                    ]);
-                }
-            }catch (InvalidArgumentException $ex){
-                $errors = json_decode($ex->getMessage(), true);
-                return new JsonModel($errors);
-            }
-
-            $user = $this->postService->getUser($data['user_id']);
-            if (!$user) {
-                return new JsonModel([
-                    'success' => false,
-                    'message' => 'User not found.'
-                ]);
-            }
-//
-            $res = $this->postService->apiAddPost($data, $user);
-//
-            return new JsonModel($res);
-
-
-
+        $file = $request->getFiles();
+        if (!$request->isPost()) {
             return new JsonModel([
-                'success' => true,
-                'post_id' => $postId,
+                'success' => false,
+                'message' => 'Your request was not accepted',
             ]);
         }
+
+        $data = json_decode($request->getContent(), true);
+
+        $res = $this->postService->apiAddPost($data, $file);
+
+        return new JsonModel($res);
     }
 }

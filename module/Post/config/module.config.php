@@ -38,7 +38,7 @@ return [
             'api-post' => [
                 'type' => 'segment',
                 'options' => [
-                    'route' => '/api/post/create',
+                    'route' => '/api/post/add',
                     'defaults' => [
                         'controller' => PostController::class,
                         'action' => 'create',
