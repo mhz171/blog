@@ -168,6 +168,7 @@ class PostController extends AbstractActionController
 
     public function createAction(): JsonModel
     {
+
         $request = $this->getRequest();
         $file = $request->getFiles();
         if (!$request->isPost()) {
@@ -179,7 +180,14 @@ class PostController extends AbstractActionController
 
         $data = json_decode($request->getContent(), true);
 
-        $res = $this->postService->apiAddPost($data, $file);
+        try {
+            $res = $this->postService->apiAddPost($data, $file);
+        }catch (\Exception $e) {
+            return new JsonModel([
+                'success' => false,
+                'message' => 'Failed to create post and comment: ' . $e->getMessage()
+            ]);
+        }
 
         return new JsonModel($res);
     }

@@ -10,10 +10,10 @@ return[
             'orm_default' => [
                 'class' => MappingDriverChain::class,
                 'drivers' => [
-                    'User\Entity' => 'user_entities',
+                    'Comment\Entity' => 'comment_entities',
                 ],
             ],
-            'user_entities' => [
+            'comment_entities' => [
                 'class' => AnnotationDriver::class,
                 'cache' => 'array',
                 'paths' => [

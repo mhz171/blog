@@ -2,21 +2,15 @@
 
 namespace Post\Service;
 
+use Comment\Entity\Comment;
 use DateTime;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use Exception;
 use InvalidArgumentException;
-use Laminas\Paginator\Adapter\ArrayAdapter;
-use Laminas\Paginator\Paginator;
-use Laminas\View\Model\JsonModel;
+
 use Post\Entity\Post;
-use Post\Form\PostForm;
 use Post\Repository\PostRepository;
-use User\Entity\User;
 
 class PostService
 {
@@ -68,36 +62,6 @@ class PostService
         ];
     }
 
-//    public function setImage($fileData, $post): void
-//    {
-//        $image = "";
-//        $file = $fileData['image'];
-//        if ($file['error'] == UPLOAD_ERR_OK) {
-//
-//            $uploadDir = './public/img/';
-//            $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
-//            $newFileName = $post->getId() . '.' . $extension;
-//            $image = $uploadDir . $newFileName;
-//
-//            if (!file_exists($uploadDir)) {
-//                mkdir($uploadDir, 0777, true);
-//            }
-//
-//            if (move_uploaded_file($file['tmp_name'], $image)) {
-//                $post->setImage($image);
-//                $this->postRepository->flush();
-//            } else {
-//                var_dump("Error uploading the file.");
-//            }
-//        }
-//    }
-//
-//    public function setImageApi($data, $post): void
-//    {
-//        $post->setImage($data['image']);
-//        $this->postRepository->flush();
-//    }
-
 
     /**
      * @throws Exception
@@ -105,7 +69,6 @@ class PostService
     public function setImage($fileData, $post): void
     {
         $image = "";
-        // Check if $fileData is an array or a api string
         if ( isset($fileData['image'])) {
             $file = $fileData['image'];
             if ($file['error'] == UPLOAD_ERR_OK) {
@@ -188,22 +151,49 @@ class PostService
 
     public function addPost($data, $fileData, $user): void
     {
-        $this->validatePostData($data);
+        $this->postRepository->beginTransaction();
 
-        $post = new Post();
-        $post->setTitle($data["title"]);
-        $post->setDescription($data["description"]);
+        try {
+            $this->validatePostData($data);
 
-        $postUser = $this->postRepository->getUserById($user->getId());
-        $post->setUser($postUser);
+            $post = new Post();
+            $post->setTitle($data["title"]);
+            $post->setDescription($data["description"]);
 
+            $postUser = $this->postRepository->getUserById($user->getId());
+            $post->setUser($postUser);
+
+            date_default_timezone_set("Asia/Tehran");
+            $post->setCreatedAt(DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
+
+            $this->postRepository->persist($post);
+            $this->postRepository->flush();
+
+            $this->setImage($fileData, $post);
+
+            $this->createComment($post);
+
+            $this->postRepository->commit();
+        }catch (\Exception $e) {
+
+            $this->postRepository->rollback();
+
+            throw $e;
+        }
+
+    }
+
+    private function createComment(Post $post): void
+    {
+        $comment = new Comment();
+        $comment->setPostId($post->getId());
+        $comment->setComment('Its good');
         date_default_timezone_set("Asia/Tehran");
-        $post->setCreatedAt(DateTime::createFromFormat('Y-m-d H:i:s', date('Y-m-d H:i:s')));
+        $comment->setCreatedAt(new \DateTime());
 
-        $this->postRepository->persist($post);
+        $this->postRepository->persist($comment);
         $this->postRepository->flush();
 
-        $this->setImage($fileData, $post);
     }
 
     public function getPostById($id)

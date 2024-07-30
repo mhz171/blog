@@ -8,6 +8,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Post\Entity\Post;
 use User\Entity\User;
+use Comment\Entity\Comment;
 
 class PostRepository
 {
@@ -71,6 +72,21 @@ class PostRepository
     public function remove($post): void
     {
         $this->entityManager->remove($post);
+    }
+
+    public function beginTransaction(): void
+    {
+        $this->entityManager->beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        $this->entityManager->commit();
+    }
+
+    public function rollback(): void
+    {
+        $this->entityManager->rollback();
     }
 
 

@@ -24,5 +24,5 @@ return [
     'Post',
     'User',
     'Application',
-    'Comment'
+    'Comment',
 ];
