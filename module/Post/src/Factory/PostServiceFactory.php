@@ -15,6 +15,6 @@ class PostServiceFactory implements FactoryInterface
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $postRepository = $container->get(PostRepository::class);
-        return new PostService( $postRepository);
+        return new PostService($postRepository);
     }
 }

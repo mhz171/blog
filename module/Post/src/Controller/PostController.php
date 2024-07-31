@@ -91,6 +91,11 @@ class PostController extends AbstractActionController
                     'Description is require'
                 ];
             }
+            else if (!$result['addCommentStatus']){
+                $errors['description'][] = [
+                    'Can not add post. Please try again later!'
+                ];
+            }
             $form->setMessages($errors);
         }
 

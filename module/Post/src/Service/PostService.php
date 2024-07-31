@@ -11,13 +11,14 @@ use InvalidArgumentException;
 
 use Post\Entity\Post;
 use Post\Repository\PostRepository;
+use Post\Repository\PostRepositoryInterface;
 
 class PostService
 {
-    private PostRepository $postRepository;
+    private PostRepositoryInterface $postRepository;
     private int $limit;
 
-    public function __construct( PostRepository $postRepository)
+    public function __construct( PostRepositoryInterface $postRepository)
     {
         $this->postRepository = $postRepository;
         $this->limit = 10;
@@ -44,9 +45,14 @@ class PostService
             ->setMaxResults($this->limit)->getQuery()->getResult();
     }
 
-    public function getPostsCount(): float|bool|int|string|null
+    public function getPostsCount(): int|null
     {
-        return $this->postRepository->getPostList(true)->getQuery()->getSingleScalarResult();
+        try {
+            return $this->postRepository->getPostList(true)->getQuery()->getSingleScalarResult();
+
+        } catch (NonUniqueResultException|NoResultException $e) {
+            return null;
+        }
     }
 
     public function getPaginatedPosts($page, $limit): array
@@ -106,7 +112,7 @@ class PostService
         }
     }
 
-    private function handleApiImageUpload($apiString, $post)
+    private function handleApiImageUpload($apiString, $post): string
     {
         $uploadDir = './public/img/';
         $extension = pathinfo(basename($apiString), PATHINFO_EXTENSION);
@@ -152,7 +158,7 @@ class PostService
         return $validationStatus;
     }
 
-    public function addPost($data, $fileData, $user)
+    public function addPost($data, $fileData, $user): array
     {
         $this->postRepository->beginTransaction();
 
@@ -209,7 +215,7 @@ class PostService
 
     }
 
-    private function createComment(Post $post)
+    private function createComment(Post $post): array
     {
         try {
 //            throw new \Exception('Simulated error');
@@ -245,7 +251,11 @@ class PostService
 
     public function getPostById($id)
     {
-        return $this->postRepository->getPostById($id);
+        try {
+            return $this->postRepository->getPostById($id);
+        }catch (\Exception $e) {
+            return null;
+        }
     }
 
     public function updatePost($post, $data, $fileData): array
@@ -269,20 +279,30 @@ class PostService
         }
         return $updatePostStatus;
     }
-    public function deletePost($post): void
+    public function deletePost($post): bool
     {
-        $file_path = $post->getImage();
-        if (file_exists($file_path)) {
-            unlink($file_path);
+        try {
+            $file_path = $post->getImage();
+            if (file_exists($file_path)) {
+                unlink($file_path);
+            }
+            $this->postRepository->remove($post);
+            $this->postRepository->flush();
+            return 1;
         }
-        $this->postRepository->remove($post);
-        $this->postRepository->flush();
+        catch (\Exception $e) {
+            return 0;
+        }
     }
-
 
     public function getUserById($id)
     {
-        return $this->postRepository->getUserById($id);
+        try {
+            return $this->postRepository->getUserById($id);
+        }
+        catch (\Exception $e) {
+            return null;
+        }
     }
 }
 

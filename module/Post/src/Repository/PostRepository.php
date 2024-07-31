@@ -10,11 +10,12 @@ use Post\Entity\Post;
 use User\Entity\User;
 
 
-class PostRepository
+class PostRepository implements PostRepositoryInterface
 {
     private EntityManagerInterface $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager){
+    public function __construct(EntityManagerInterface $entityManager)
+    {
         $this->entityManager = $entityManager;
     }
 
@@ -23,13 +24,13 @@ class PostRepository
         $qb = $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
             ->leftJoin('p.user', 'u', 'u.id = p.user_id');
 
-        if($filter){
+        if ($filter) {
             $qb->Where($filter);
         }
 
-        if ($totalFlag){
+        if ($totalFlag) {
             $qb->select('COUNT(p.id)');
-        }else{
+        } else {
             $qb->select('p.title, p.description, u.username, p.created_at, p.image, u.id AS user_id, p.id AS post_id');
             $qb->orderBy('p.created_at', 'ASC');
         }
@@ -37,14 +38,15 @@ class PostRepository
         return $qb;
     }
 
-    public function getPostById($id)
+    public function getPostById($id): ?Post
     {
         return $this->entityManager
             ->getRepository(Post::class)
             ->find($id);
     }
 
-    public function getUserById($id){
+    public function getUserById($id): ?User
+    {
         return $this->entityManager
             ->getRepository(User::class)
             ->find($id);
@@ -79,7 +81,6 @@ class PostRepository
     {
         $this->entityManager->rollback();
     }
-
 
 
 }
