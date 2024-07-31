@@ -160,7 +160,7 @@ class PostController extends AbstractActionController
 
     }
 
-    public function createAction(): JsonModel
+    public function addApiAction(): JsonModel
     {
 
         $request = $this->getRequest();
@@ -174,15 +174,36 @@ class PostController extends AbstractActionController
 
         $data = json_decode($request->getContent(), true);
 
-        try {
-            $res = $this->postService->apiAddPost($data, $file);
-        }catch (\Exception $e) {
+        $user = $this->postService->getUserById($data['user_id']);
+        if (!$user) {
             return new JsonModel([
                 'success' => false,
-                'message' => 'Failed to create post and comment: ' . $e->getMessage()
+                'message' => 'User not found.'
             ]);
         }
 
-        return new JsonModel($res);
+        $res = $this->postService->AddPost($data, $data['image'], $user);
+
+         if ($res['success'])
+         {
+             return new JsonModel([
+                 'success' => true,
+                 'message' => 'Post added successfully.'
+             ]);
+         }else if (!$res['titleStatus'] || !$res['descriptionStatus'])
+         {
+             return new JsonModel([
+                'success' => false,
+                'message' => 'title or description is not valid.'
+             ]);
+         }else
+         {
+             return new JsonModel([
+                 'success' => false,
+                 'message' => 'comment can\'t be added.'
+             ]);
+         }
+
+
     }
 }

@@ -44,19 +44,11 @@ class PostService
             ->setMaxResults($this->limit)->getQuery()->getResult();
     }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
     public function getPostsCount(): float|bool|int|string|null
     {
         return $this->postRepository->getPostList(true)->getQuery()->getSingleScalarResult();
     }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
     public function getPaginatedPosts($page, $limit): array
     {
         $this->limit = $limit;
@@ -77,10 +69,6 @@ class PostService
         ];
     }
 
-
-    /**
-     * @throws Exception
-     */
     public function setImage($fileData, $post): void
     {
         $image = "";
@@ -100,7 +88,7 @@ class PostService
         }
     }
 
-    private function handleImageUpload($file, $post)
+    private function  handleImageUpload($file, $post): string
     {
         $uploadDir = './public/img/';
         $extension = pathinfo(basename($file['name']), PATHINFO_EXTENSION);
@@ -142,31 +130,39 @@ class PostService
     }
 
 
-    public function validatePostData($data): int
+    public function validatePostData($data): array
     {
-        $errors = [];
-        if (empty($data['title'])) {
-            $errors['title'][] = "Title is required";
-        } elseif (strlen($data['title']) > 255) {
-            $errors['title'][] = "Title cannot exceed 255 characters";
+        $validationStatus = [ 'success' => true, 'addCommentStatus' => false, 'userLoginStatus' => true ];
+        if (empty($data['title']) || strlen($data['title']) > 255) {
+            $validationStatus['titleStatus'] = false;
+        }else {
+            $validationStatus['titleStatus'] = true;
         }
 
-        if (empty($data['description'])) {
-            $errors['description'][] = "Description is required";
-        }elseif (strlen($data['description']) > 255) {
-            $errors['description'][] = "description cannot exceed 255 characters";
+        if (empty($data['description']) || strlen($data['description']) > 255) {
+            $validationStatus['descriptionStatus'] = false;
+        }else {
+            $validationStatus['descriptionStatus'] = true;
         }
 
-        if (!empty($errors)) {
-            throw new InvalidArgumentException(json_encode($errors));
+        if (!$validationStatus['titleStatus'] || !$validationStatus['descriptionStatus']) {
+            $validationStatus['success'] = false;
+            throw new InvalidArgumentException(json_encode($validationStatus));
         }
-        return 1;
+        return $validationStatus;
     }
 
-    public function addPost($data, $fileData, $user): void
+    public function addPost($data, $fileData, $user)
     {
         $this->postRepository->beginTransaction();
 
+        $addNewPostStatus = [
+            'success' => false,
+            'userLoginStatus' => true,
+            'titleStatus' => false,
+            'descriptionStatus' => false,
+            'addCommentStatus' => false,
+        ];
         try {
 //            throw new \Exception('Simulated error');
             $this->validatePostData($data);
@@ -189,26 +185,61 @@ class PostService
             $this->createComment($post);
 
             $this->postRepository->commit();
+
+            $addNewPostStatus['titleStatus']  = true;
+            $addNewPostStatus['descriptionStatus'] = true;
+            $addNewPostStatus['success'] = true;
+            $addNewPostStatus['addCommentStatus'] = true;
         }catch (\Exception $e) {
 
+            $error = json_decode($e->getMessage(), true);
             $this->postRepository->rollback();
 
-            throw $e;
+            $addNewPostStatus['addCommentStatus'] = $error['addCommentStatus'] ;
+            $addNewPostStatus['titleStatus'] =  $error['titleStatus']  ;
+            $addNewPostStatus['descriptionStatus'] =  $error['descriptionStatus'];
+            $addNewPostStatus['success'] = $error['success'] ;
+
         }
+
+        return $addNewPostStatus;
+
+
+
 
     }
 
-    private function createComment(Post $post): void
+    private function createComment(Post $post)
     {
-//        throw new \Exception('Simulated error');
-        $comment = new Comment();
-        $comment->setPostId($post->getId());
-        $comment->setComment('Its good');
-        date_default_timezone_set("Asia/Tehran");
-        $comment->setCreatedAt(new \DateTime());
+        try {
+//            throw new \Exception('Simulated error');
+            $comment = new Comment();
+            $comment->setPostId($post->getId());
+            $comment->setComment('Its good');
+            date_default_timezone_set("Asia/Tehran");
+            $comment->setCreatedAt(new \DateTime());
 
-        $this->postRepository->persist($comment);
-        $this->postRepository->flush();
+            $this->postRepository->persist($comment);
+            $this->postRepository->flush();
+            return [
+                'userLoginStatus' => true,
+                'titleStatus' => true,
+                'descriptionStatus' => true,
+                'success' => true,
+                'addCommentStatus' => true,
+            ];
+        }
+        catch (\Exception $e) {
+            throw new InvalidArgumentException(json_encode( [
+                'userLoginStatus' => true,
+                'titleStatus' => true,
+                'descriptionStatus' => true,
+                'success' => false,
+                'addCommentStatus' => false
+            ] ));
+
+        }
+
 
     }
 
@@ -237,36 +268,10 @@ class PostService
         $this->postRepository->flush();
     }
 
-    public function apiAddPost($data, $file)
+
+    public function getUserById($id)
     {
-
-        try {
-            if (!$this->validatePostData($data)) {
-                return [
-                    'success' => false,
-                    'message' => 'Title, description, and user_id are required.'
-                ];
-            }
-        }catch (InvalidArgumentException $ex){
-            return json_decode($ex->getMessage(), true);
-        }
-
-        $user = $this->postRepository->getUserById($data['user_id']);
-
-        if (!$user) {
-            return [
-                'success' => false,
-                'message' => 'User not found.'
-            ];
-        }
-
-        $this->addPost($data, $data['image'], $user);
-
-        return [
-            'success' => true,
-            'message' => 'success'
-        ];
-
+        return $this->postRepository->getUserById($id);
     }
 }
 

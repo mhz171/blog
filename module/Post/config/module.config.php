@@ -41,7 +41,7 @@ return [
                     'route' => '/api/post/add',
                     'defaults' => [
                         'controller' => PostController::class,
-                        'action' => 'create',
+                        'action' => 'addApi',
                     ],
                 ],
             ],
