@@ -33,27 +33,42 @@ class PostService
         }
     }
 
-    public function calculateTotalPosts(): float
+    public function calculateTotalPosts($totalPosts): float
     {
-        $totalItems = 0;
-        try {
-            $totalItems = $this->postRepository->getPostCount();
-        } catch (NoResultException|NonUniqueResultException $e) {
-            var_dump($e->getMessage());
-        }
-        return ceil($totalItems / $this->limit);
+        return ceil($totalPosts / $this->limit);
     }
 
+    public function getPosts($offset): array
+    {
+        return $this->postRepository->getPostList(false)->setFirstResult($offset)
+            ->setMaxResults($this->limit)->getQuery()->getResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
+    public function getPostsCount(): float|bool|int|string|null
+    {
+        return $this->postRepository->getPostList(true)->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @throws NonUniqueResultException
+     * @throws NoResultException
+     */
     public function getPaginatedPosts($page, $limit): array
     {
         $this->limit = $limit;
         $offset = ($page - 1) * $this->limit;
 
-        $posts = $this->postRepository->getPosts($offset, $this->limit);
+        $posts = $this->getPosts($offset);
+
+        $totalPosts = $this->getPostsCount();
 
         $this->preparePosts($posts);
 
-        $totalPages = $this->calculateTotalPosts();
+        $totalPages = $this->calculateTotalPosts($totalPosts);
 
         return [
             'posts' => $posts,
@@ -148,12 +163,12 @@ class PostService
         return 1;
     }
 
-
     public function addPost($data, $fileData, $user): void
     {
         $this->postRepository->beginTransaction();
 
         try {
+//            throw new \Exception('Simulated error');
             $this->validatePostData($data);
 
             $post = new Post();
@@ -185,6 +200,7 @@ class PostService
 
     private function createComment(Post $post): void
     {
+//        throw new \Exception('Simulated error');
         $comment = new Comment();
         $comment->setPostId($post->getId());
         $comment->setComment('Its good');
@@ -248,6 +264,7 @@ class PostService
 
         return [
             'success' => true,
+            'message' => 'success'
         ];
 
     }

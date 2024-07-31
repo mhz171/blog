@@ -4,29 +4,23 @@ namespace Post\Controller;
 
 
 use InvalidArgumentException;
+
 use Laminas\Http\Response;
 use Laminas\Mvc\Controller\AbstractActionController;
-use Laminas\Paginator\Adapter\ArrayAdapter;
-use Laminas\Session\Container;
 use Laminas\Stdlib\ArrayUtils;
 use Laminas\View\Model\JsonModel;
 use Laminas\View\Model\ViewModel;
-use Laminas\Paginator\Paginator;
-
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
-use Doctrine\ORM\EntityManager;
 
 use Post\Controller\Plugin\AuthPlugin;
 use Post\Service\PostService;
 use Post\Form\PostForm;
-use Post\Entity\Post;
-use User\Entity\User;
+
 
 
 
 class PostController extends AbstractActionController
 {
-    private $postService;
+    private PostService $postService;
     private $user;
     private $auth;
     private $isLoggedIn;

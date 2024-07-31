@@ -3,12 +3,12 @@
 namespace Post\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
+
 use Post\Entity\Post;
+
 use User\Entity\User;
-use Comment\Entity\Comment;
+
 
 class PostRepository
 {
@@ -18,32 +18,23 @@ class PostRepository
         $this->entityManager = $entityManager;
     }
 
-    private function createBaseQuery(): QueryBuilder
+    public function getPostList($totalFlag = false, $filter = null): QueryBuilder
     {
-        return $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
-            ->leftJoin('p.user', 'u', 'u.id = p.user_id')
-            ->select('p.title, p.description, u.username, p.created_at, p.image, u.id AS user_id, p.id AS post_id')
-            ->orderBy('p.created_at', 'ASC');
-    }
-    public function getPosts($offset , $limit)
-    {
-        $queryBuilder = $this->createBaseQuery()->setFirstResult($offset)
-            ->setMaxResults($limit);;
+        $qb = $this->entityManager->getRepository(Post::class)->createQueryBuilder('p')
+            ->leftJoin('p.user', 'u', 'u.id = p.user_id');
 
-        return $queryBuilder->getQuery()->getResult();
-    }
+        if($filter){
+            $qb->Where($filter);
+        }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
-    public function getPostCount(): float|bool|int|string|null
-    {
-        $queryBuilder = $this->createBaseQuery();
+        if ($totalFlag){
+            $qb->select('COUNT(p.id)');
+        }else{
+            $qb->select('p.title, p.description, u.username, p.created_at, p.image, u.id AS user_id, p.id AS post_id');
+            $qb->orderBy('p.created_at', 'ASC');
+        }
 
-        $queryBuilder->select('COUNT(p.id)');
-
-        return $queryBuilder->getQuery()->getSingleScalarResult();
+        return $qb;
     }
 
     public function getPostById($id)
