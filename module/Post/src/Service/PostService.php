@@ -132,7 +132,7 @@ class PostService
 
     public function validatePostData($data): array
     {
-        $validationStatus = [ 'success' => true, 'addCommentStatus' => false, 'userLoginStatus' => true ];
+        $validationStatus = [ 'success' => true, 'addCommentStatus' => false, 'userLoginStatus' => true, 'titleStatus' , 'descriptionStatus'  ];
         if (empty($data['title']) || strlen($data['title']) > 255) {
             $validationStatus['titleStatus'] = false;
         }else {
@@ -248,15 +248,26 @@ class PostService
         return $this->postRepository->getPostById($id);
     }
 
-    public function updatePost($post, $data, $fileData): void
+    public function updatePost($post, $data, $fileData): array
     {
-        $this->validatePostData($data);
+        try {
+            $updatePostStatus = $this->validatePostData($data);
 
-        $post->setTitle($data["title"]);
-        $post->setDescription($data["description"]);
+            $post->setTitle($data["title"]);
+            $post->setDescription($data["description"]);
 
-        $this->postRepository->flush();
-        $this->setImage($fileData, $post);
+            $this->postRepository->flush();
+            $this->setImage($fileData, $post);
+        }catch (\Exception $e) {
+            $error = json_decode($e->getMessage(), true);
+
+            $updatePostStatus['addCommentStatus'] = $error['addCommentStatus'] ;
+            $updatePostStatus['titleStatus'] =  $error['titleStatus']  ;
+            $updatePostStatus['descriptionStatus'] =  $error['descriptionStatus'];
+            $updatePostStatus['success'] = $error['success'] ;
+            return $updatePostStatus;
+        }
+        return $updatePostStatus;
     }
     public function deletePost($post): void
     {

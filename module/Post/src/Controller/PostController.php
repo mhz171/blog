@@ -51,10 +51,11 @@ class PostController extends AbstractActionController
         ]);
     }
 
-    public function addAction(): array|Response
+    public function addAction(): array|null
     {
         if (!$this->isLoggedIn){
-            return $this->redirect()->toRoute('login');
+            $this->redirect()->toRoute('login');
+            return null;
         }
 
         $request = $this->getRequest();
@@ -63,17 +64,33 @@ class PostController extends AbstractActionController
         $form->get('submit')->setValue('Add');
 
         if (!$request->isPost()) {
-            return ['form' => $form];
+            return [
+                'isLoggedIn' => $this->isLoggedIn,
+                'form' => $form,
+                ];
         }
 
         $data = ArrayUtils::iteratorToArray($request->getPost());
         $fileData = $request->getFiles();
 
-        try {
-            $this->postService->addPost($data, $fileData, $this->user);
-            return $this->redirect()->toRoute('post');
-        } catch (InvalidArgumentException $ex) {
-            $errors = json_decode($ex->getMessage(), true);
+
+        $result  = $this->postService->addPost($data, $fileData, $this->user);
+
+        if ($result['success']) {
+            $this->redirect()->toRoute('post');
+            return null;
+        }else {
+            $errors = [];
+            if (!$result['titleStatus']){
+                $errors['title'][] = [
+                    'Title is require'
+                ];
+            }
+            if (!$result['descriptionStatus']){
+                $errors['description'][] = [
+                    'Description is require'
+                ];
+            }
             $form->setMessages($errors);
         }
 
@@ -83,17 +100,20 @@ class PostController extends AbstractActionController
         ];
     }
 
-    public function editAction(): Response|array
+    public function editAction(): null|array
     {
         if (!$this->isLoggedIn){
-            return $this->redirect()->toRoute('login');
+            $this->redirect()->toRoute('login');
+            return null ;
+
         }
 
         $request = $this->getRequest();
         $id = (int)$this->params()->fromRoute('id', 0);
 
         if (!$request->isPost() && 0 === $id) {
-            return $this->redirect()->toRoute('post', ['action' => 'add']);
+            $this->redirect()->toRoute('post', ['action' => 'add']);
+            return null;
         }
 
         $post = $this->postService->getPostById($id);
@@ -107,21 +127,57 @@ class PostController extends AbstractActionController
         $fileData = $request->getFiles();
         $data = ArrayUtils::iteratorToArray($request->getPost());
 
-        try {
-            $this->postService->updatePost($post, $data, $fileData);
-            return $this->redirect()->toRoute('post', ['action' => 'index']);
-        } catch (InvalidArgumentException $ex) {
-            $errors = json_decode($ex->getMessage(), true);
-            $form->setMessages($errors);
+
+        if (!$request->isPost())
+        {
+            return [
+                'postUserId' => $post->user->getId(),
+                'userId' => $this->user ? $this->user->getId() : null,
+                'postId' => $id,
+                'form' => $form,
+                'isLoggedIn' => $this->isLoggedIn,
+            ];
         }
 
-        return [
-            'postUserId' => $post->user->getId(),
-            'userId' => $this->user ? $this->user->getId() : null,
-            'postId' => $id,
-            'form' => $form,
-            'isLoggedIn' => $this->isLoggedIn,
-        ];
+
+        $result = $this->postService->updatePost($post, $data, $fileData);
+
+
+
+        if ($result['success']) {
+            $this->redirect()->toRoute('post', ['action' => 'index']);
+            return [
+                'postUserId' => $post->user->getId(),
+                'userId' => $this->user ? $this->user->getId() : null,
+                'postId' => $id,
+                'form' => $form,
+                'isLoggedIn' => $this->isLoggedIn,
+            ];
+        }else {
+//            var_dump(1234);exit();
+            $errors = [];
+            if (!$result['titleStatus']){
+                $errors['title'][] = [
+                    'Title is require'
+                ];
+            }
+            if (!$result['descriptionStatus']){
+                $errors['description'][] = [
+                    'Description is require'
+                ];
+            }
+            $form->setMessages($errors);
+            return [
+                'postUserId' => $post->user->getId(),
+                'userId' => $this->user ? $this->user->getId() : null,
+                'postId' => $id,
+                'form' => $form,
+                'isLoggedIn' => $this->isLoggedIn,
+            ];
+
+        }
+
+
 
     }
 
