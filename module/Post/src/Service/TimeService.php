@@ -14,11 +14,13 @@ class TimeService
         $this->time = $time;
     }
 
-    public function dateToShamsi()
+    public function dateToShams(): string
     {
         include_once __DIR__ . '/../../../../vendor/jdf/jdf.php';
 
         $timestamp = $this->time->getTimestamp();
+
+        date_default_timezone_set("Asia/Tehran");
 
         $shamsiDate = jdate('Y-m-d H:i:s', $timestamp);
 
@@ -26,14 +28,6 @@ class TimeService
 
     }
 
-    public function dateToMiladi()
-    {
-        include_once __DIR__ . '/../../../../vendor/jdf/jdf.php';
-
-        $timestamp = jdate('Y-m-d H:i:s', strtotime($this->time));
-
-        return $timestamp;
-    }
 
 
 

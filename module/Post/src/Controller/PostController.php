@@ -14,21 +14,21 @@ use Laminas\View\Model\ViewModel;
 use Post\Controller\Plugin\AuthPlugin;
 use Post\Service\PostService;
 use Post\Form\PostForm;
-
-
+use Post\Service\PostServiceInterface;
 
 
 class PostController extends AbstractActionController
 {
-    private PostService $postService;
+    private PostServiceInterface $postService;
     private $user;
     private $auth;
     private $isLoggedIn;
 
-    public function __construct(PostService $postService)
+    public function __construct(PostServiceInterface $postService)
     {
         $this->postService = $postService;
 
+        // check for login user
         $this->auth = $this->plugin(AuthPlugin::class);
         $this->user = $this->auth->getUser();
         $this->isLoggedIn = $this->auth->isLoggedIn();
@@ -37,29 +37,33 @@ class PostController extends AbstractActionController
 
     public function indexAction(): ViewModel
     {
+        //get page number and limit in url
         $limit = $this->params()->fromQuery('limit', 10);
         $page = $this->params()->fromQuery('page', 1);
 
+        //settingPaginator contain post, currentPage and totalPage
         $settingPaginator = $this->postService->getPaginatedPosts($page, $limit);
 
         return new ViewModel([
             'isLoggedIn' => $this->isLoggedIn,
             'user' => $this->user,
             'posts' => $settingPaginator['posts'],
-            'currentPage' => $page,
+            'currentPage' => $settingPaginator['currentPage'],
             'totalPages' => $settingPaginator['totalPages'],
         ]);
     }
 
     public function addAction(): array|null
     {
-        if (!$this->isLoggedIn){
+        //check user is login
+        if (!$this->isLoggedIn) {
             $this->redirect()->toRoute('login');
             return null;
         }
 
         $request = $this->getRequest();
 
+        //create form for view
         $form = new PostForm();
         $form->get('submit')->setValue('Add');
 
@@ -67,31 +71,32 @@ class PostController extends AbstractActionController
             return [
                 'isLoggedIn' => $this->isLoggedIn,
                 'form' => $form,
-                ];
+            ];
         }
 
+        //converse data in request to array
         $data = ArrayUtils::iteratorToArray($request->getPost());
         $fileData = $request->getFiles();
 
+        //result have success, userLoginStatus, titleStatus, descriptionStatus, addCommentStatus
+        $result = $this->postService->addPost($data, $fileData, $this->user);
 
-        $result  = $this->postService->addPost($data, $fileData, $this->user);
-
+        //check result if post successfully added redirect to main page else set error
         if ($result['success']) {
             $this->redirect()->toRoute('post');
             return null;
-        }else {
+        } else {
             $errors = [];
-            if (!$result['titleStatus']){
+            if (!$result['titleStatus']) {
                 $errors['title'][] = [
                     'Title is require'
                 ];
             }
-            if (!$result['descriptionStatus']){
+            if (!$result['descriptionStatus']) {
                 $errors['description'][] = [
                     'Description is require'
                 ];
-            }
-            else if (!$result['addCommentStatus']){
+            } else if (!$result['addCommentStatus']) {
                 $errors['description'][] = [
                     'Can not add post. Please try again later!'
                 ];
@@ -99,6 +104,7 @@ class PostController extends AbstractActionController
             $form->setMessages($errors);
         }
 
+        //return to view
         return [
             'isLoggedIn' => $this->isLoggedIn,
             'form' => $form,
@@ -107,34 +113,44 @@ class PostController extends AbstractActionController
 
     public function editAction(): null|array
     {
-        if (!$this->isLoggedIn){
+        //check user is login
+        if (!$this->isLoggedIn) {
             $this->redirect()->toRoute('login');
-            return null ;
+            return null;
 
         }
 
         $request = $this->getRequest();
+
+        //get postId from url
         $id = (int)$this->params()->fromRoute('id', 0);
 
+        //if postId is zero its mean we don't have this post then go to add page
         if (!$request->isPost() && 0 === $id) {
             $this->redirect()->toRoute('post', ['action' => 'add']);
             return null;
         }
 
+        //get post for edit
         $post = $this->postService->getPostById($id);
+
+        //create post form for view
         $form = new PostForm();
         $form->bind($post);
         $form->get('submit')->setAttribute('value', 'Edit');
-
+        //set filter for validation
         $form->setInputFilter($post->getInputFilter());
 
         $form->setData($request->getPost());
+
+        //get file data for image
         $fileData = $request->getFiles();
+
+        //convert data from request
         $data = ArrayUtils::iteratorToArray($request->getPost());
 
-
-        if (!$request->isPost())
-        {
+        // show data to user
+        if (!$request->isPost()) {
             return [
                 'postUserId' => $post->user->getId(),
                 'userId' => $this->user ? $this->user->getId() : null,
@@ -144,60 +160,56 @@ class PostController extends AbstractActionController
             ];
         }
 
-
+        // update post with new data
         $result = $this->postService->updatePost($post, $data, $fileData);
 
-
-
+        //check result if post successfully added redirect to main page else set error
         if ($result['success']) {
             $this->redirect()->toRoute('post', ['action' => 'index']);
-            return [
-                'postUserId' => $post->user->getId(),
-                'userId' => $this->user ? $this->user->getId() : null,
-                'postId' => $id,
-                'form' => $form,
-                'isLoggedIn' => $this->isLoggedIn,
-            ];
-        }else {
-//            var_dump(1234);exit();
+        } else {
             $errors = [];
-            if (!$result['titleStatus']){
+            if (!$result['titleStatus']) {
                 $errors['title'][] = [
                     'Title is require'
                 ];
             }
-            if (!$result['descriptionStatus']){
+            if (!$result['descriptionStatus']) {
                 $errors['description'][] = [
                     'Description is require'
                 ];
             }
             $form->setMessages($errors);
-            return [
-                'postUserId' => $post->user->getId(),
-                'userId' => $this->user ? $this->user->getId() : null,
-                'postId' => $id,
-                'form' => $form,
-                'isLoggedIn' => $this->isLoggedIn,
-            ];
-
         }
-
+        return [
+            'postUserId' => $post->user->getId(),
+            'userId' => $this->user ? $this->user->getId() : null,
+            'postId' => $id,
+            'form' => $form,
+            'isLoggedIn' => $this->isLoggedIn,
+        ];
 
 
     }
 
-    public function deleteAction(): Response|array
+    public function deleteAction(): null|array
     {
-        if (!$this->isLoggedIn){
-            return $this->redirect()->toRoute('login');
+        //check user is login
+        if (!$this->isLoggedIn) {
+            $this->redirect()->toRoute('login');
+            return null;
         }
-
+        //get post id from url for delete
         $id = (int)$this->params()->fromRoute('id', 0);
+
+        // if id is zero this post does not exist
         if (!$id) {
-            return $this->redirect()->toRoute('post');
+            $this->redirect()->toRoute('post');
+            return null;
         }
 
         $request = $this->getRequest();
+
+        //get post from db for show user
         $post = $this->postService->getPostById($id);
 
         if (!$request->isPost()) {
@@ -209,23 +221,24 @@ class PostController extends AbstractActionController
                 'post' => $post,
             ];
         }
-
+        //get request for delete post from view
         $del = $request->getPost('del', 'No');
 
+        // delete post
         if ($del == 'Yes') {
             $this->postService->deletePost($post);
         }
 
-        return $this->redirect()->toRoute('post');
-
-
+        //back to menu
+        $this->redirect()->toRoute('post');
+        return null;
     }
 
     public function addApiAction(): JsonModel
     {
-
         $request = $this->getRequest();
-        $file = $request->getFiles();
+
+        // if send method is not post
         if (!$request->isPost()) {
             return new JsonModel([
                 'success' => false,
@@ -233,8 +246,10 @@ class PostController extends AbstractActionController
             ]);
         }
 
+        //extract data from input json
         $data = json_decode($request->getContent(), true);
 
+        //find user who want to add post
         $user = $this->postService->getUserById($data['user_id']);
         if (!$user) {
             return new JsonModel([
@@ -245,26 +260,22 @@ class PostController extends AbstractActionController
 
         $res = $this->postService->AddPost($data, $data['image'], $user);
 
-         if ($res['success'])
-         {
-             return new JsonModel([
-                 'success' => true,
-                 'message' => 'Post added successfully.'
-             ]);
-         }else if (!$res['titleStatus'] || !$res['descriptionStatus'])
-         {
-             return new JsonModel([
+        //check result for successfully added or set error
+        if ($res['success']) {
+            return new JsonModel([
+                'success' => true,
+                'message' => 'Post added successfully.'
+            ]);
+        } else if (!$res['titleStatus'] || !$res['descriptionStatus']) {
+            return new JsonModel([
                 'success' => false,
                 'message' => 'title or description is not valid.'
-             ]);
-         }else
-         {
-             return new JsonModel([
-                 'success' => false,
-                 'message' => 'comment can\'t be added.'
-             ]);
-         }
-
-
+            ]);
+        } else {
+            return new JsonModel([
+                'success' => false,
+                'message' => 'comment can\'t be added.'
+            ]);
+        }
     }
 }

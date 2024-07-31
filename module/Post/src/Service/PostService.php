@@ -10,10 +10,11 @@ use Exception;
 use InvalidArgumentException;
 
 use Post\Entity\Post;
+use User\Entity\User;
 use Post\Repository\PostRepository;
 use Post\Repository\PostRepositoryInterface;
 
-class PostService
+class PostService implements PostServiceInterface
 {
     private PostRepositoryInterface $postRepository;
     private int $limit;
@@ -29,7 +30,7 @@ class PostService
         foreach ($posts as &$post) {
             $createdAt = $post['created_at'];
             $timeService  = new TimeService($createdAt);
-            $post['created_at'] = $timeService->dateToShamsi();
+            $post['created_at'] = $timeService->dateToShams();
 
         }
     }
@@ -249,7 +250,7 @@ class PostService
 
     }
 
-    public function getPostById($id)
+    public function getPostById($id): ?Post
     {
         try {
             return $this->postRepository->getPostById($id);
@@ -295,7 +296,7 @@ class PostService
         }
     }
 
-    public function getUserById($id)
+    public function getUserById($id): ?User
     {
         try {
             return $this->postRepository->getUserById($id);
