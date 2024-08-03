@@ -4,7 +4,7 @@
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriverChain;
 
-return[
+return [
     'doctrine' => [
         'driver' => [
             'orm_default' => [

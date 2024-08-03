@@ -1,69 +1,3 @@
-<?php //if ($this->flag): ?>
-<!--    <h3>--><?php //echo $this->user->getUsername(); ?><!-- logined!</h3>-->
-<?php //else: ?>
-<!--    <p>No user logged in.</p>-->
-<?php //endif; ?>
-<?php
-//$title = 'My posts';
-//$this->headTitle($title);
-//?>
-<!--<h1>--><?php //= $this->escapeHtml($title) ?><!--</h1>-->
-
-<!---->
-<!--<table class="table">-->
-<!--    <tr>-->
-<!--        <th>Title</th>-->
-<!--        <th>Description</th>-->
-<!--        <th>Created Time</th>-->
-<!--        <th>Author</th>-->
-<!--        <th>Image</th>-->
-<!--        <th>&nbsp;</th>-->
-<!--    </tr>-->
-<!---->
-<!---->
-<!--    --><?php //foreach ($this->paginator as $post) : ?>
-<!--        --><?php //var_dump($post); ?>
-<!--        <tr>-->
-<!--            <td>-->
-<!--                --><?php //= $this->escapeHtml($post['title']);?>
-<!--            </td>-->
-<!--            <td>-->
-<!---->
-<!--                --><?php //=$this->escapeHtml($post['description']); ?>
-<!--            </td>-->
-<!---->
-<!--            <td>-->
-<!---->
-<!--                --><?php //= $this->escapeHtml($post['created_at']->format('Y-m-d H:i:s')); ?>
-<!--            </td>-->
-<!---->
-<!---->
-<!--            <td>-->
-<!--                --><?php //= $this->escapeHtml($post['username']);?>
-<!--            </td>-->
-<!--            <td>-->
-<!--                --><?php //if (!empty($post['image'])) : ?>
-<!--                    <img src="--><?php //= $this->escapeHtmlAttr($this->basePath(substr($post['image'], 8))) ?><!--" alt="--><?php //= $this->escapeHtmlAttr($post['title']) ?><!--" width="100">-->
-<!--                --><?php //endif; ?>
-<!--            </td>-->
-<!--            --><?php //if ($this->flag && $this->user->getId() == $post['user_id']) : ?>
-<!--            <td>-->
-<!--                <a href="--><?php //= $this->url('post', ['action' => 'edit', 'id' => $post['post_id']]) ?><!--">Edit</a>-->
-<!--                <a href="--><?php //= $this->url('post', ['action' => 'delete', 'id' => $post['post_id']]) ?><!--">Delete</a>-->
-<!--            </td>-->
-<!--            --><?php //else : ?>
-<!--            <td>Can't Change </td>-->
-<!--            --><?php //endif; ?>
-<!--        </tr>-->
-<!--    --><?php //endforeach; ?>
-<!---->
-<!--</table>-->
-<!---->
-<!---->
-<!---->
-<?php //= $this->partial('partial/paginator', ['paginator' => $this->paginator]); ?>
-<!---->
-
 <?php if ($this->isLoggedIn): ?>
     <h3><?php echo $this->user->getUsername(); ?> logined!</h3>
 <?php else: ?>
@@ -97,7 +31,8 @@
             <td><?= $this->escapeHtml($post['created_at']); ?></td>
             <td>
                 <?php if (!empty($post['image'])) : ?>
-                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post['image'], 8))) ?>" alt="<?= $this->escapeHtmlAttr($post['title']) ?>" width="100">
+                    <img src="<?= $this->escapeHtmlAttr($this->basePath(substr($post['image'], 8))) ?>"
+                         alt="<?= $this->escapeHtmlAttr($post['title']) ?>" width="100">
                 <?php endif; ?>
             </td>
             <?php if ($this->isLoggedIn && $this->user->getId() == $post['user_id']) : ?>
@@ -106,7 +41,7 @@
                     <a href="<?= $this->url('post', ['action' => 'delete', 'id' => $post['post_id']]) ?>">Delete</a>
                 </td>
             <?php else : ?>
-                <td>Can't Change </td>
+                <td>Can't Change</td>
             <?php endif; ?>
         </tr>
     <?php endforeach; ?>
@@ -118,7 +53,9 @@
         <ul class="pagination">
             <?php if ($this->currentPage > 1) : ?>
                 <li class="page-item">
-                    <a class="page-link" href="<?= $this->url('post', [], ['query' => ['page' => $this->currentPage - 1]]) ?>" aria-label="Previous">
+                    <a class="page-link"
+                       href="<?= $this->url('post', [], ['query' => ['page' => $this->currentPage - 1]]) ?>"
+                       aria-label="Previous">
                         <span aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
@@ -132,7 +69,9 @@
 
             <?php if ($this->currentPage < $this->totalPages) : ?>
                 <li class="page-item">
-                    <a class="page-link" href="<?= $this->url('post', [], ['query' => ['page' => $this->currentPage + 1]]) ?>" aria-label="Next">
+                    <a class="page-link"
+                       href="<?= $this->url('post', [], ['query' => ['page' => $this->currentPage + 1]]) ?>"
+                       aria-label="Next">
                         <span aria-hidden="true">&raquo;</span>
                     </a>
                 </li>

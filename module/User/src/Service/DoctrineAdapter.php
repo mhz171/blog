@@ -80,7 +80,7 @@ class DoctrineAdapter implements AdapterInterface
                 'result' => $result,
             ];
 
-        } else{
+        } else {
             $user = new User();
             $user->setUsername($data['username']);
             $user->setPassword($data['password']);
@@ -92,7 +92,7 @@ class DoctrineAdapter implements AdapterInterface
             $this->entityManager->persist($user);
             $this->entityManager->flush();
 
-            return $this->loginManager($data, $authAdapter) ;
+            return $this->loginManager($data, $authAdapter);
         }
     }
 }

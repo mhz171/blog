@@ -1,4 +1,5 @@
 <?php
+
 namespace Comment\Entity;
 
 use Doctrine\ORM\Mapping as ORM;

@@ -27,11 +27,11 @@ class MenuBar extends AbstractHelper
         ];
 
 //        if ($isLoggedIn) {
-            $menuItems['Logout'] = '/logout';
-            $menuItems['Profile'] = '/profile';
+        $menuItems['Logout'] = '/logout';
+        $menuItems['Profile'] = '/profile';
 //        } else {
-            $menuItems['Login'] = '/login';
-            $menuItems['Register'] = '/register';
+        $menuItems['Login'] = '/login';
+        $menuItems['Register'] = '/register';
 //        }
 
         $html = '<ul class="menu-bar">';

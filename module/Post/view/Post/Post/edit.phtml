@@ -1,84 +1,82 @@
-
-
 <?php
 $title = 'Edit post';
 $this->headTitle($title);
 ?>
 <h1><?= $this->escapeHtml($title) ?></h1>
 <?php if ($this->isLoggedIn && $this->userId == $this->postUserId): ?>
-<?php
+    <?php
 // Assuming $post is the post data retrieved from the database
 // and $postImagePath contains the path to the current image
 
 // Check if elements exist in the form
-$postTitle = $this->form->has('title') ? $this->form->get('title') : null;
-if ($postTitle) {
-    $postTitle->setAttribute('class', 'form-control');
-    $postTitle->setAttribute('placeholder', 'Post title');
-}
+    $postTitle = $this->form->has('title') ? $this->form->get('title') : null;
+    if ($postTitle) {
+        $postTitle->setAttribute('class', 'form-control');
+        $postTitle->setAttribute('placeholder', 'Post title');
+    }
 
-$postDescription = $this->form->has('description') ? $this->form->get('description') : null;
-if ($postDescription) {
-    $postDescription->setAttribute('class', 'form-control');
-    $postDescription->setAttribute('placeholder', 'Description');
-}
+    $postDescription = $this->form->has('description') ? $this->form->get('description') : null;
+    if ($postDescription) {
+        $postDescription->setAttribute('class', 'form-control');
+        $postDescription->setAttribute('placeholder', 'Description');
+    }
 
-$image1 = $this->form->has('image') ? $this->form->get('image') : null;
+    $image1 = $this->form->has('image') ? $this->form->get('image') : null;
 
 // Add file input for image upload
-$image = new \Laminas\Form\Element\File('image');
-$image->setAttribute('class', 'form-control');
-$image->setAttribute('accept', 'image/*');
-$image->setLabel('Upload Image (Leave empty to keep current image)');
-$this->form->add($image);
+    $image = new \Laminas\Form\Element\File('image');
+    $image->setAttribute('class', 'form-control');
+    $image->setAttribute('accept', 'image/*');
+    $image->setLabel('Upload Image (Leave empty to keep current image)');
+    $this->form->add($image);
 
-$submit = $this->form->has('submit') ? $this->form->get('submit') : null;
-if ($submit) {
-    $submit->setAttribute('class', 'btn btn-primary');
-}
+    $submit = $this->form->has('submit') ? $this->form->get('submit') : null;
+    if ($submit) {
+        $submit->setAttribute('class', 'btn btn-primary');
+    }
 
-$this->form->setAttribute('action', $this->url('post', [
-    'action' => 'edit',
-    'id'     => $this->postId,
-]));
-$this->form->setAttribute('enctype', 'multipart/form-data'); // Important for file uploads
-$this->form->prepare();
+    $this->form->setAttribute('action', $this->url('post', [
+        'action' => 'edit',
+        'id' => $this->postId,
+    ]));
+    $this->form->setAttribute('enctype', 'multipart/form-data'); // Important for file uploads
+    $this->form->prepare();
 
-echo $this->form()->openTag($this->form);
-?>
+    echo $this->form()->openTag($this->form);
+    ?>
 
-<div class="form-group">
-    <?= $postTitle ? $this->formLabel($postTitle) : '' ?>
-    <?= $postTitle ? $this->formElement($postTitle) : '' ?>
-    <?= $postTitle ? $this->formElementErrors()->render($postTitle, ['class' => 'help-block']) : '' ?>
-</div>
+    <div class="form-group">
+        <?= $postTitle ? $this->formLabel($postTitle) : '' ?>
+        <?= $postTitle ? $this->formElement($postTitle) : '' ?>
+        <?= $postTitle ? $this->formElementErrors()->render($postTitle, ['class' => 'help-block']) : '' ?>
+    </div>
 
-<div class="form-group">
-    <?= $postDescription ? $this->formLabel($postDescription) : '' ?>
-    <?= $postDescription ? $this->formElement($postDescription) : '' ?>
-    <?= $postDescription ? $this->formElementErrors()->render($postDescription, ['class' => 'help-block']) : '' ?>
-</div>
+    <div class="form-group">
+        <?= $postDescription ? $this->formLabel($postDescription) : '' ?>
+        <?= $postDescription ? $this->formElement($postDescription) : '' ?>
+        <?= $postDescription ? $this->formElementErrors()->render($postDescription, ['class' => 'help-block']) : '' ?>
+    </div>
 
-<div class="form-group">
-    <label>Current Image:</label>
-    <?php if ($image1 && $image1->getValue()) : ?>
-        <img src="<?= $this->basePath(substr($image1->getValue(), 8)) ?>" alt="" width="100">
-    <?php else: ?>
-        <p>No image available.</p>
-    <?php endif; ?>
-</div>
+    <div class="form-group">
+        <label>Current Image:</label>
+        <?php if ($image1 && $image1->getValue()) : ?>
+            <img src="<?= $this->basePath(substr($image1->getValue(), 8)) ?>" alt="" width="100">
+        <?php else: ?>
+            <p>No image available.</p>
+        <?php endif; ?>
+    </div>
 
-<div class="form-group">
-    <?= $this->formLabel($image) ?>
-    <?= $this->formElement($image) ?>
-    <?= $this->formElementErrors()->render($image, ['class' => 'help-block']) ?>
-</div>
+    <div class="form-group">
+        <?= $this->formLabel($image) ?>
+        <?= $this->formElement($image) ?>
+        <?= $this->formElementErrors()->render($image, ['class' => 'help-block']) ?>
+    </div>
 
-<?php
-echo $submit ? $this->formSubmit($submit) : '';
-echo $this->formHidden($this->form->get('id'));
-echo $this->form()->closeTag();
-?>
-<?php else:?>
+    <?php
+    echo $submit ? $this->formSubmit($submit) : '';
+    echo $this->formHidden($this->form->get('id'));
+    echo $this->form()->closeTag();
+    ?>
+<?php else: ?>
     <h1>You can't edit Post</h1>
 <?php endif; ?>

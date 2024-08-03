@@ -20,7 +20,7 @@ class AuthController extends AbstractActionController
 
     private $authAdapter;
 
-    public function __construct( DoctrineAdapter $authAdapter)
+    public function __construct(DoctrineAdapter $authAdapter)
     {
 
         $this->authAdapter = $authAdapter;
@@ -42,7 +42,7 @@ class AuthController extends AbstractActionController
 
                 if ($loginInfo['result']->isValid()) {
                     return $this->redirect()->toRoute('post');
-                }else{
+                } else {
                     $form->setMessages(['password' => $loginInfo['result']->getMessages()]);
                     return new ViewModel([
                         'form' => $form,

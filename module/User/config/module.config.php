@@ -1,4 +1,5 @@
 <?php
+
 namespace User;
 
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
@@ -25,22 +26,22 @@ return [
     'router' => [
         'routes' => [
             'home' => [
-                'type'    => Literal::class,
+                'type' => Literal::class,
                 'options' => [
-                    'route'    => '/',
+                    'route' => '/',
                     'defaults' => [
                         'controller' => AuthController::class,
-                        'action'     => 'login',
+                        'action' => 'login',
                     ],
                 ],
             ],
             'login' => [
-                'type'    => 'Literal',
+                'type' => 'Literal',
                 'options' => [
-                    'route'    => '/login',
+                    'route' => '/login',
                     'defaults' => [
                         'controller' => AuthController::class,
-                        'action'     => 'login',
+                        'action' => 'login',
                     ],
                 ],
             ],

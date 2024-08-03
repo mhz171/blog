@@ -19,7 +19,7 @@ class AuthPlugin extends AbstractPlugin
         $this->user = $user;
     }
 
-    public function isLoggedIn() : bool
+    public function isLoggedIn(): bool
     {
         return (bool)$this->user;
     }

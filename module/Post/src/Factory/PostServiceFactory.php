@@ -2,8 +2,6 @@
 
 namespace Post\Factory;
 
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
 use Interop\Container\ContainerInterface;
 use Laminas\ServiceManager\Factory\FactoryInterface;
 use Post\Repository\PostRepository;

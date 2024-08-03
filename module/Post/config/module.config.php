@@ -87,7 +87,7 @@ return [
 
     'view_helpers' => [
         'factories' => [
-            MenuBar::class => function($container) {
+            MenuBar::class => function ($container) {
                 $authService = $container->get(AuthenticationService::class);
                 return new MenuBar($authService);
             },
